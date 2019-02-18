@@ -1,0 +1,3 @@
+/home/daria/Documents/III_course/machgraf/task1/build/CMakeFiles/rebuild_cache.dir
+/home/daria/Documents/III_course/machgraf/task1/build/CMakeFiles/main.dir
+/home/daria/Documents/III_course/machgraf/task1/build/CMakeFiles/edit_cache.dir
