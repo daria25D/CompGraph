@@ -72,19 +72,18 @@ vec3 ray_marching(vec3 ro, vec3 rd, vec3 light_position) {
             total_distance_traveled += distance_to_ellipsoid;
         }
     }
-    return vec3(0.0, 0.0, 0.0);
+    return vec3(0.0, 0.0, 0.1);
 }
 
 void main() {
     vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
-    vec3 rd = normalize(vec3(tmp, -(g_screenWidth)/tan(3.14159265/3)));
-    mat3 rdMat = mat3(g_rayMatrix);//multiply 3x3 x rd
-    rd = rdMat * rd;
-    //vec2 uv = fragCoord.xy * 2.0 - 1.0;
-    vec3 ro = vec3(0.0 + g_rayMatrix[3][0], 0.0 + g_rayMatrix[3][1], 5.0 + g_rayMatrix[3][3]); //+ ray_matrix[3][i]
-    //vec3 rd = vec3(uv, 1.0);
-    vec3 light_position = vec3(2.0, 5.0, 3.0);
-    vec3 shader_color = ray_marching(ro, rd, light_position);
+    vec3 ray_dir = normalize(vec3(tmp, -(g_screenWidth)/tan(3.14159265/3)));
+    mat3 rdMat = mat3(g_rayMatrix);//multiply rayMatrix 3x3 x rd
+    ray_dir = rdMat * ray_dir;
+    vec3 ray_pos = vec3(0.0 + g_rayMatrix[3][0], 0.0 + g_rayMatrix[3][1], 5.0 + g_rayMatrix[3][3]); //+ rayMatrix[3][i]
+
+    vec3 light_position = vec3(2.0, 7.0, 4.0);
+    vec3 shader_color = ray_marching(ray_pos, ray_dir, light_position);
     color = vec4(shader_color, 1.0);
 }
 

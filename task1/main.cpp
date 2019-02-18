@@ -14,10 +14,11 @@ static GLsizei WIDTH = 512, HEIGHT = 512; //размеры окна
 
 using namespace LiteMath;
 
-float3 g_camPos(0, 0, 5);
+float3 cameraPos(0, 0, 5);
 float cam_rot[2] = {0, 0};
 float mx = 0, my = 0;
-
+float3 cameraFront(0.0f, 0.0f, -1.0f);
+float3 cameraUp(0.0f, 1.0f,  0.0f);
 
 void windowResize(GLFWwindow *window, int width, int height) {
     WIDTH = width;
@@ -36,6 +37,20 @@ static void mouseMove(GLFWwindow *window, double xpos, double ypos) {
 
     mx = xpos;
     my = ypos;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    GLfloat cameraSpeed = 0.1f;
+    if(key == GLFW_KEY_W)
+        cameraPos += cameraSpeed * cameraFront;
+    if(key == GLFW_KEY_S)
+        cameraPos -= cameraSpeed * cameraFront;
+    if(key == GLFW_KEY_A)
+        cameraPos -= normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+    if(key == GLFW_KEY_D)
+        cameraPos += normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 
@@ -141,7 +156,7 @@ int main(int argc, char **argv) {
     //цикл обработки сообщений и отрисовки сцены каждый кадр
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-
+        glfwSetKeyCallback(window, key_callback);
         //очищаем экран каждый кадр
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         GL_CHECK_ERRORS;
@@ -151,13 +166,13 @@ int main(int argc, char **argv) {
         program.StartUseShader();
         GL_CHECK_ERRORS;
         float4x4 camRotMatrix = mul(rotate_Y_4x4(-cam_rot[1]), rotate_X_4x4(+cam_rot[0]));
-        float4x4 camTransMatrix = translate4x4(g_camPos);
+        float4x4 camTransMatrix = translate4x4(cameraPos);
         float4x4 rayMatrix = mul(camTransMatrix, camRotMatrix);
         //отслеживать нажата ли кнопка или отпущена, матрицу изменять в цикле
         //матрицу  сдвига умножать на матрицу сдвига и на матрицу поворота текущую слева
         //program.SetUniform("radius", 0.5f);
         program.SetUniform("g_rayMatrix", rayMatrix);
-        //float cam_pos[3] = {g_camPos.x, g_camPos.y, g_camPos.z};
+        //float cam_pos[3] = {cameraPos.x, cameraPos.y, cameraPos.z};
         //program.SetUniform("cam_pos", cam_pos);
         GL_CHECK_ERRORS;
         program.SetUniform("g_screenWidth", WIDTH);
