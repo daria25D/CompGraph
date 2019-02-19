@@ -19,6 +19,7 @@ float cam_rot[2] = {0, 0};
 float mx = 0, my = 0;
 float3 cameraFront(0.0f, 0.0f, -1.0f);
 float3 cameraUp(0.0f, 1.0f,  0.0f);
+bool keys[1024];
 
 void windowResize(GLFWwindow *window, int width, int height) {
     WIDTH = width;
@@ -40,19 +41,29 @@ static void mouseMove(GLFWwindow *window, double xpos, double ypos) {
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    if (keys[GLFW_KEY_ESCAPE]) {
         glfwSetWindowShouldClose(window, GL_TRUE);
-    GLfloat cameraSpeed = 0.1f;
-    if(key == GLFW_KEY_W)
-        cameraPos += cameraSpeed * cameraFront;
-    if(key == GLFW_KEY_S)
-        cameraPos -= cameraSpeed * cameraFront;
-    if(key == GLFW_KEY_A)
-        cameraPos -= normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
-    if(key == GLFW_KEY_D)
-        cameraPos += normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+    if (action == GLFW_PRESS)
+        keys[key] = true;
+    else if (action == GLFW_RELEASE)
+        keys[key] = false;
+
 }
 
+void move_camera()
+{
+    // Camera controls
+    GLfloat cameraSpeed = 0.1f;
+    if(keys[GLFW_KEY_W])
+        cameraPos += cameraSpeed * cameraFront;
+    if(keys[GLFW_KEY_S])
+        cameraPos -= cameraSpeed * cameraFront;
+    if(keys[GLFW_KEY_A])
+        cameraPos -= normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+    if(keys[GLFW_KEY_D])
+        cameraPos += normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+}
 
 int initGL() {
     int res = 0;
@@ -94,6 +105,8 @@ int main(int argc, char **argv) {
 
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+    glfwSetKeyCallback(window, key_callback);
 
     if (initGL() != 0)
         return -1;
@@ -156,7 +169,7 @@ int main(int argc, char **argv) {
     //цикл обработки сообщений и отрисовки сцены каждый кадр
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        glfwSetKeyCallback(window, key_callback);
+        move_camera();
         //очищаем экран каждый кадр
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         GL_CHECK_ERRORS;

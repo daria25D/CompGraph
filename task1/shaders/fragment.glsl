@@ -38,22 +38,52 @@ vec3 calculate_normal(vec3 p, int num)
     return normalize(normal);
 }
 
-vec3 ray_marching(vec3 ro, vec3 rd, vec3 light_position) {
+vec3 phong_light_model(vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p, vec3 ray_pos,
+                       vec3 light_position, vec3 light_intensity, int num) {
+    vec3 normal = calculate_normal(p, num);
+    vec3 light_direction = normalize(light_position - p);
+    vec3 reflection_direction = normalize(reflect(-light_direction, normal));
+    vec3 viewer_direction = normalize(ray_pos - p);
+
+    float dot_ln = dot(light_direction, normal);
+    float dot_rv = dot(reflection_direction, viewer_direction);
+    if (dot_ln < 0.0) { // not visible
+        return vec3(0.0);
+    }
+    if (dot_rv  < 0.0) { //direction of light is opposite to viewer
+        return light_intensity * (k_diffuse * dot_ln);
+    }
+    return light_intensity * (k_diffuse * dot_ln + k_specular * pow(dot_rv, alpha));
+}
+
+vec3 phong_illumination(vec3 k_ambient, vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p,
+                        vec3 ray_pos, vec3 light_position, int num) {
+    vec3 ambient_light = 0.5 * vec3(1.0, 1.0, 1.0);
+    vec3 color = ambient_light * k_ambient;
+    vec3 light_intensity = vec3(0.4, 0.4, 0.4);
+
+    color += phong_light_model(k_diffuse, k_specular, alpha, p, ray_pos, light_position, light_intensity, num);
+    return color;
+}
+
+vec3 ray_marching(vec3 ray_pos, vec3 ray_dir, vec3 light_position) {
     float total_distance_traveled = 0.0;
     const int NUM_OF_STEPS = 128;
     const float MIN_HIT_DIST = 0.01;
     const float MAX_TRACE_DIST = 1000.0;
     const float radius = 1.0f;
     for (int i = 0; i < NUM_OF_STEPS; i++) {
-        vec3 current_position = ro + total_distance_traveled * rd;
+        vec3 current_position = ray_pos + total_distance_traveled * ray_dir;
         float distance_to_sphere = distance_from_sphere(current_position, vec3(0.0), radius);
         float distance_to_ellipsoid = distance_from_ellipsoid(current_position, vec3(2.0, 2.0, 0.0), vec3(1.0, 0.5, 2.0));
         if (distance_to_sphere < distance_to_ellipsoid) {
             if (distance_to_sphere < MIN_HIT_DIST) { //hit
-                vec3 normal = calculate_normal(current_position, 0);
-                vec3 direction_to_light = normalize(current_position - light_position);
-                float diffuse_intensity = max(0.0, dot(normal, direction_to_light));
-                return vec3(1.0, 0.0, 0.0) * diffuse_intensity;
+                vec3 k_ambient = vec3(0.2, 0.2, 0.2);
+                vec3 k_diffuse = vec3(0.7, 0.2, 0.2);
+                vec3 k_specular = vec3(1.0, 1.0, 1.0);
+                float shininess = 10.0;
+                return phong_illumination(k_ambient, k_diffuse, k_specular, shininess,
+                                          current_position, ray_pos, light_position, 0);
             }
             if (total_distance_traveled > MAX_TRACE_DIST) { //miss
                 break;
@@ -61,10 +91,12 @@ vec3 ray_marching(vec3 ro, vec3 rd, vec3 light_position) {
             total_distance_traveled += distance_to_sphere;
         } else {
             if (distance_to_ellipsoid < MIN_HIT_DIST) { //hit
-                vec3 normal = calculate_normal(current_position, 1);
-                vec3 direction_to_light = normalize(current_position - light_position);
-                float diffuse_intensity = max(0.0, dot(normal, direction_to_light));
-                return vec3(0.0, 1.0, 0.0) * diffuse_intensity;
+                vec3 k_ambient = vec3(0.2, 0.2, 0.2);
+                vec3 k_diffuse = vec3(0.2, 0.7, 0.2);
+                vec3 k_specular = vec3(1.0, 1.0, 1.0);
+                float shininess = 10.0;
+                return phong_illumination(k_ambient, k_diffuse, k_specular, shininess,
+                                          current_position, ray_pos, light_position, 1);
             }
             if (total_distance_traveled > MAX_TRACE_DIST) { //miss
                 break;
