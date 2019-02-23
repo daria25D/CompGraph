@@ -27,6 +27,19 @@ float distance_from_plane(vec3 p, vec3 c, vec4 n) {
   return dot(p - c, n.xyz) + n.w;
 }
 
+float distance_from_cube(vec3 p, vec3 c, vec3 s) {
+    vec3 d = abs(p - c) - s;
+
+    float insideDistance = min(max(d.x, max(d.y, d.z)), 0.0);
+    float outsideDistance = length(max(d, 0.0));
+
+    return insideDistance + outsideDistance;
+}
+
+float intersect(float dist_a, float dist_b) {
+    return max(dist_a, dist_b);
+}
+
 float twist_torus(vec3 p, vec3 c, vec2 t, float twists)
 {
     float k = cos(twists*(p.y - c.y));
@@ -47,7 +60,8 @@ float bend_torus(vec3 p, vec3 c, vec2 t, float bends)
 
 float distance_to_surface(vec3 p, int num) {
     if (num == 0) {
-        return distance_from_sphere(p, vec3(0.0), 1.0);
+        //return distance_from_sphere(p, vec3(0.0), 1.0);
+        return intersect(distance_from_sphere(p / 1.2, vec3(0.0), 1.0) * 1.2, distance_from_cube(p, vec3(0.0), vec3(1.0)));
     } else if (num == 1) {
         return distance_from_ellipsoid(p,  vec3(2.0, 0.0, -2.0), vec3(1.0, 0.5, 2.0));
     } else if (num == 2) {
