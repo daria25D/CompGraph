@@ -18,13 +18,31 @@ float distance_from_ellipsoid(vec3 p, vec3 c, vec3 r) {
     return (length((p - c)/r) - 1.0) * min(min(r.x,r.y),r.z);
 }
 
-float distance_from_torus(vec3 p, vec3 c, vec2 t) {
-    vec2 q = vec2(length(p.xz - c.xz) - t.x, p.y - c.y);
+float distance_from_torus(vec3 p, vec2 t) {
+    vec2 q = vec2(length(p.xz) - t.x, p.y);
     return length(q) - t.y;
 }
 float distance_from_plane(vec3 p, vec3 c, vec4 n) {
   // n must be normalized
   return dot(p - c, n.xyz) + n.w;
+}
+
+float twist_torus(vec3 p, vec3 c, vec2 t, float twists)
+{
+    float k = cos(twists*(p.y - c.y));
+    float s = sin(twists*(p.y - c.y));
+    mat2  m = mat2(k, -s, s, k);
+    vec3  q = vec3(m*(p.xz - c.xz), p.y - c.y);
+    return distance_from_torus(q, t);
+}
+
+float bend_torus(vec3 p, vec3 c, vec2 t, float bends)
+{
+    float k = cos(bends*(p.y - c.y));
+    float s = sin(bends*(p.y - c.y));
+    mat2  m = mat2(k, -s, s, k);
+    vec3  q = vec3(m*(p.xy - c.xy), (p.z - c.z));
+    return distance_from_torus(q, t);
 }
 
 float distance_to_surface(vec3 p, int num) {
@@ -33,7 +51,8 @@ float distance_to_surface(vec3 p, int num) {
     } else if (num == 1) {
         return distance_from_ellipsoid(p,  vec3(2.0, 0.0, -2.0), vec3(1.0, 0.5, 2.0));
     } else if (num == 2) {
-        return distance_from_torus(p, vec3(-1.0, -3.0, 0.0), vec2(1.0, 0.5));
+        //return distance_from_torus(p, vec3(-1.0, -3.0, 0.0), vec2(1.0, 0.5));
+        return bend_torus(p, vec3(-1.0, -3.0, 0.0), vec2(1.0, 0.5), 0.5);
     } else if (num == 3) {
         return distance_from_plane(p, vec3(-1.0, -1.0, -1.0), vec4(0.0, 1.0, 0.0, 5.0));
     }
