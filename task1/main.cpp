@@ -14,30 +14,45 @@ static GLsizei WIDTH = 512, HEIGHT = 512; //размеры окна
 
 using namespace LiteMath;
 
-float3 cameraPos(0, 0, 5);
-float cam_rot[2] = {0, 0};
-float mx = 0, my = 0;
-float3 cameraFront(0.0f, 0.0f, -1.0f);
-float3 cameraUp(0.0f, 1.0f,  0.0f);
-bool keys[1024];
+float3 camera_position(0, 0, 5);
+float cam_rot[3] = {0, 0, 0};
+float mx = float(WIDTH), my = HEIGHT/2.0;
+bool keys[350];
 
 void windowResize(GLFWwindow *window, int width, int height) {
     WIDTH = width;
     HEIGHT = height;
+    //mx = width;
+    //my = height/2.0;
 }
 
 static void mouseMove(GLFWwindow *window, double xpos, double ypos) {
-    xpos *= 0.05f;
-    ypos *= 0.05f;
+    GLfloat mouse_sensitivity  = 37.0f;
 
-    //int x1 = int(xpos);
-    //int y1 = int(ypos);
+    float horiz_movement = float(xpos * 0.15f - mx);
+    float vert_movement  = float(ypos * 0.15f - my);
 
-    cam_rot[0] -= 0.25f * (ypos - my);    //Изменение угола поворота
-    cam_rot[1] -= 0.25f * (xpos - mx);
+    cam_rot[0] -= vert_movement / mouse_sensitivity;
+    cam_rot[1] += horiz_movement / mouse_sensitivity;
 
-    mx = xpos;
-    my = ypos;
+    // Limit loking up
+    if (cam_rot[0] < -90.0f) {
+        cam_rot[0] = -90.0f;
+    }
+    // Limit looking down
+    if (cam_rot[0] > 90.0f) {
+        cam_rot[0] = 90.0f;
+    }
+    // Looking left and right. Limit range from -180.0f to 180.0f
+    if (cam_rot[1] < -180.0f) {
+        cam_rot[1] += 360.0f;
+    }
+    if (cam_rot[1] > 180.0f) {
+        cam_rot[1] -= 360.0f;
+    }
+    mx = float(xpos * 0.15f);
+    my = float(ypos * 0.15f);
+
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
@@ -51,18 +66,41 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 }
 
-void move_camera()
-{
+float to_rads(const float &angle) {
+    return angle * DEG_TO_RAD;
+}
+
+void move_camera() {
     // Camera controls
-    GLfloat cameraSpeed = 0.1f;
-    if(keys[GLFW_KEY_W])
-        cameraPos += cameraSpeed * cameraFront;
-    if(keys[GLFW_KEY_S])
-        cameraPos -= cameraSpeed * cameraFront;
-    if(keys[GLFW_KEY_A])
-        cameraPos -= normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
-    if(keys[GLFW_KEY_D])
-        cameraPos += normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+    float3 camera_movement(0.0, 0.0, 0.0);
+
+    GLfloat camera_speed = 0.25f;
+    if (keys[GLFW_KEY_LEFT_SHIFT])
+        camera_speed *= 2;
+    if (!keys[GLFW_KEY_LEFT_SHIFT])
+        camera_speed = 0.25f;
+    if (keys[GLFW_KEY_W]) {
+        camera_movement.x += (camera_speed * sin(to_rads(cam_rot[1]))) * cos(to_rads(cam_rot[0]));
+        camera_movement.y += camera_speed * sin(to_rads(cam_rot[0])) * -1.0f;//* sin(to_rads(cam_rot[0]));
+        camera_movement.z += (camera_speed * cos(to_rads(cam_rot[1])) * -1.0f ) * cos(to_rads(cam_rot[0]));
+    }
+    if (keys[GLFW_KEY_S]) {
+        camera_movement.x += (camera_speed * sin(to_rads(cam_rot[1])) * -1.0f) * cos(to_rads(cam_rot[0]));
+        camera_movement.y += camera_speed * sin(to_rads(cam_rot[0]));
+        camera_movement.z += (camera_speed * cos(to_rads(cam_rot[1]))) * cos(to_rads(cam_rot[0]));
+    }
+    if (keys[GLFW_KEY_A]) {
+        camera_movement.x += -camera_speed * cos(to_rads(cam_rot[1]));
+        camera_movement.z += -camera_speed * sin(to_rads(cam_rot[1]));
+    }
+    if (keys[GLFW_KEY_D]) {
+        camera_movement.x += camera_speed * cos(to_rads(cam_rot[1]));
+        camera_movement.z += camera_speed * sin(to_rads(cam_rot[1]));
+    }
+
+
+    camera_position += camera_movement;
+
 }
 
 int initGL() {
@@ -178,14 +216,18 @@ int main(int argc, char **argv) {
 
         program.StartUseShader();
         GL_CHECK_ERRORS;
+        //std::cout << camera_position.x << " " << camera_position.y << " " << camera_position.z << std::endl;
         float4x4 camRotMatrix = mul(rotate_Y_4x4(-cam_rot[1]), rotate_X_4x4(+cam_rot[0]));
-        float4x4 camTransMatrix = translate4x4(cameraPos);
+        float4x4 camTransMatrix = translate4x4(camera_position);
         float4x4 rayMatrix = mul(camTransMatrix, camRotMatrix);
+        //float4x4 matr = mul(camRotMatrix, camTransMatrix);
+        //rayMatrix = mul(matr, rayMatrix);
+        //rayMatrix = mul(rayMatrix, camRotMatrix);
         //отслеживать нажата ли кнопка или отпущена, матрицу изменять в цикле
         //матрицу  сдвига умножать на матрицу сдвига и на матрицу поворота текущую слева
         //program.SetUniform("radius", 0.5f);
         program.SetUniform("g_rayMatrix", rayMatrix);
-        //float cam_pos[3] = {cameraPos.x, cameraPos.y, cameraPos.z};
+        //float cam_pos[3] = {camera_position.x, camera_position.y, camera_position.z};
         //program.SetUniform("cam_pos", cam_pos);
         GL_CHECK_ERRORS;
         program.SetUniform("g_screenWidth", WIDTH);
