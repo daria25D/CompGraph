@@ -58,6 +58,33 @@ vec3 calculate_normal(vec3 p, int num)
     return normalize(normal);
 }
 
+vec3 phong_light_model(vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p, vec3 ray_pos,
+                       vec3 light_position[NUM_OF_LIGHTS], vec3 light_intensity, int num) {
+    vec3 final_color = vec3(0.0);
+    vec3 normal = calculate_normal(p, num);
+    vec3 viewer_direction = normalize(ray_pos - p);
+
+    for (int i = 0; i < NUM_OF_LIGHTS; i++) {
+        vec3 light_direction = normalize(light_position[i] - p);
+        vec3 reflection_direction = normalize(reflect(-light_direction, normal));
+        float dot_ln = dot(light_direction, normal);
+        float dot_rv = dot(reflection_direction, viewer_direction);
+        final_color += light_intensity * (k_diffuse * dot_ln + k_specular * pow(max(dot_rv, 0.0), alpha));
+    }
+    return final_color;
+}
+
+vec3 phong_illumination(vec3 k_ambient, vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p,
+                        vec3 ray_pos, vec3 light_position[NUM_OF_LIGHTS], int num) {
+    vec3 ambient_light = 0.5 * vec3(1.0, 1.0, 1.0);
+    vec3 color = ambient_light * k_ambient;
+    vec3 light_intensity = vec3(0.45, 0.45, 0.45);
+
+    color += phong_light_model(k_diffuse, k_specular, alpha, p, ray_pos,
+                               light_position, light_intensity, num);
+    return color;
+}
+
 
 float ambient_occlusion(vec3 pos, vec3 normal)
 {
@@ -82,6 +109,7 @@ float soft_shadow(vec3 light_pos, vec3 light_dir, float min_t, float max_t, floa
     for(int i = 0; i < 32; i++ )
     {
         float distance = min_distance(light_pos + light_dir * t);
+
         float y = distance*distance / (2.0*ph);
         float d = sqrt(distance*distance - y*y);
         res = min(res, k*d / max(0.0, t - y));
@@ -93,37 +121,6 @@ float soft_shadow(vec3 light_pos, vec3 light_dir, float min_t, float max_t, floa
 
     }
     return clamp(res, 0.0, 1.0);
-}
-
-vec3 phong_light_model(vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p, vec3 ray_pos,
-                       vec3 light_position[NUM_OF_LIGHTS], vec3 light_intensity, int num) {
-    vec3 final_color = vec3(0.0);
-    vec3 normal = calculate_normal(p, num);
-    vec3 viewer_direction = normalize(ray_pos - p);
-
-    for (int i = 0; i < NUM_OF_LIGHTS; i++) {
-        vec3 light_direction = normalize(light_position[i] - p);
-        vec3 reflection_direction = normalize(reflect(-light_direction, normal));
-        float dot_ln = dot(light_direction, normal);
-        float dot_rv = dot(reflection_direction, viewer_direction);
-        float diffuse = clamp(dot_ln, 0.0, 1.0) * soft_shadow(light_position[i], light_direction, 0.01, 3.0, 8);
-        float specular = pow(clamp(max(dot_rv, 0.0), 0.0, 1.0), alpha) * diffuse *
-                         pow(clamp(dot(normal, reflection_direction), 0.0, 1.0), 16.0);
-        final_color += light_intensity * (k_diffuse * diffuse + k_specular * specular);
-    }
-    return final_color;
-}
-
-vec3 phong_illumination(vec3 k_ambient, vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p,
-                        vec3 ray_pos, vec3 light_position[NUM_OF_LIGHTS], int num) {
-    //vec3 ambient_light = 0.5 * vec3(1.0, 1.0, 1.0);
-    float ambient_light = ambient_occlusion(p, calculate_normal(p, num));
-    vec3 color = ambient_light * k_ambient;
-    vec3 light_intensity = vec3(0.45, 0.45, 0.45);
-
-    color += phong_light_model(k_diffuse, k_specular, alpha, p, ray_pos,
-                               light_position, light_intensity, num);
-    return color;
 }
 
 vec3 ray_marching(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
