@@ -130,6 +130,9 @@ int main(int argc, char **argv) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    //antialiasing?
+    glfwWindowHint(GLFW_SAMPLES, 8);
+
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL ray marching sample", nullptr, nullptr);
     if (window == nullptr) {
@@ -163,7 +166,8 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
 
     glfwSwapInterval(1); // force 60 frames per second
-
+    //antialiasing?
+    glEnable(GL_MULTISAMPLE);
     //Создаем и загружаем геометрию поверхности
     //
     int width, height;

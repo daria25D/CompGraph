@@ -13,8 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ebcc894b-a0cc-4e82-aadc-68fadb8673e6" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LiteMath.h" beforeDir="false" afterPath="$PROJECT_DIR$/LiteMath.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/main.dir/main.cpp.o" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/fragment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/fragment.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/main" beforeDir="false" />
@@ -34,8 +32,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="541">
-              <caret line="240" column="45" selection-start-line="240" selection-start-column="45" selection-end-line="240" selection-end-column="45" />
+            <state relative-caret-position="450">
+              <caret line="169" column="4" lean-forward="true" selection-start-line="169" selection-start-column="4" selection-end-line="169" selection-end-column="4" />
               <folding>
                 <element signature="e#20#39#0" expanded="true" />
                 <element signature="e#132#155#0" expanded="true" />
@@ -92,8 +90,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/shaders/fragment.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="116">
-              <caret line="10" column="10" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="10" />
+            <state relative-caret-position="404">
+              <caret line="119" column="23" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -221,12 +219,12 @@
       <workItem from="1550214991021" duration="6447000" />
       <workItem from="1550239763556" duration="44733000" />
       <workItem from="1550690652391" duration="7485000" />
-      <workItem from="1550927374715" duration="3355000" />
+      <workItem from="1550927374715" duration="10592000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="62584000" />
+    <option name="totallyTimeSpent" value="69821000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -245,7 +243,7 @@
       <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.18167202" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="CMake" order="0" weight="0.21492206" />
-      <window_info anchor="bottom" id="Terminal" order="1" weight="0.32962137" />
+      <window_info anchor="bottom" id="Terminal" order="1" weight="0.32884398" />
       <window_info anchor="bottom" id="Event Log" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="3" />
       <window_info anchor="bottom" id="Messages" order="4" weight="0.31762066" />
@@ -330,17 +328,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="541">
-          <caret line="240" column="45" selection-start-line="240" selection-start-column="45" selection-end-line="240" selection-end-column="45" />
-          <folding>
-            <element signature="e#20#39#0" expanded="true" />
-            <element signature="e#132#155#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/GLFW/glfw3.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="56574">
@@ -376,6 +363,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="169" column="4" lean-forward="true" selection-start-line="169" selection-start-column="4" selection-end-line="169" selection-end-column="4" />
+          <folding>
+            <element signature="e#20#39#0" expanded="true" />
+            <element signature="e#132#155#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/shaders/vertex.glsl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
@@ -385,8 +383,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/shaders/fragment.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="116">
-          <caret line="10" column="10" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="10" />
+        <state relative-caret-position="404">
+          <caret line="119" column="23" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="23" />
         </state>
       </provider>
     </entry>
