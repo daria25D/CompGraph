@@ -176,7 +176,7 @@ vec3 intersection_point(vec3 ray_pos, vec3 ray_dir) {
 }
 
 float ambient_occlusion(vec3 p, vec3 n){
-    const int steps = 8;
+    const int steps = 12;
     const float delta = 0.5;
 
     float a = 0.0;
@@ -190,7 +190,7 @@ float ambient_occlusion(vec3 p, vec3 n){
     return clamp(1.0 - a, 0.0, 1.0);
 }
 
-float soft_shadow(in vec3 ray_pos, in vec3 ray_dir){
+float soft_shadow(vec3 ray_pos, vec3 ray_dir){
     float res = 1.0, t = 0.15;
     for(int i = 0; i < 16; i++) {
         float h = min_distance(ray_pos + ray_dir*t);
@@ -206,20 +206,24 @@ vec3 ray_marching(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]
     vec3 normal = calculate_normal(pos);
     vec3 color = color_of_closest_object(pos);
     vec3 gi = color_lerp(pos);
-    vec3 final_color = vec3(1.0);
+    vec3 final_color = vec3(0.0);
     //float shininess = 50.0;
-    for (int i = 0; i < NUM_OF_LIGHTS; i++) {
+    vec3 light_dir1 = normalize(light_position[0] - pos);
+    vec3 light_dir2 = normalize(light_position[1] - pos);
+    vec3 viewer_dir = normalize(ray_pos - pos);
+    vec3 reflection1 = normalize(light_dir1 + viewer_dir);
+    vec3 reflection2 = normalize(light_dir2 + viewer_dir);
+    float diffuse1 = dot(normal, light_dir1);
+    float diffuse2 = dot(normal, light_dir2);
+    float specular1 = max(0.0, pow(dot(normal, reflection1), shininess)) * float(diffuse1 > 0.0);
+    float specular2 = max(0.0, pow(dot(normal, reflection2), shininess)) * float(diffuse2 > 0.0);
+    diffuse1 = 0.5 + 0.5 * diffuse1;
+    diffuse2 = 0.5 + 0.5 * diffuse2;
+    float ambient_occ = ambient_occlusion(pos, normal);
+    float shadow1 = soft_shadow(pos, normalize(light_position[0]));
+    float shadow2 = soft_shadow(pos, normalize(light_position[1]));
+    final_color += vec3(diffuse1 * diffuse2 * (0.5 + 0.5 * (shadow1 + shadow2)) * ambient_occ * (color + gi) + specular1 + specular2);
 
-        vec3 light_dir = normalize(light_position[i] - pos);
-        vec3 viewer_dir = normalize(ray_pos - pos);
-        vec3 reflection = normalize(light_dir + viewer_dir);
-        float diffuse = dot(normal, light_dir);
-        float specular = max(0.0, pow(dot(normal, reflection), shininess)) * float(diffuse > 0.0);
-        diffuse = 0.5 + 0.5 * diffuse;
-        float ambient_occ = ambient_occlusion(pos, normal);
-        float shadow = soft_shadow(pos, normalize(light_position[i]));
-        final_color *= vec3(diffuse * (0.5 + 0.5 * shadow) * ambient_occ * (color + gi) + specular);
-    }
     return final_color;
 }
 
