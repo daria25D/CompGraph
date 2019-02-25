@@ -10,14 +10,44 @@ out vec4 color;
 
 const int NUM_OF_LIGHTS = 2;
 
+//objects
+float sphere; //current distance
+vec3  sphere_centre    = vec3(0.0, 0.0, 0.0);
+float sphere_radius    = 1.0;
+vec3  sphere_color     = vec3(0.9, 0.1, 0.1);
+float sphere_shininess = 10.0;
+
+float ellipsiod;
+vec3  ellipsoid_centre     = vec3(2.0, 0.0, -2.0);
+vec3  ellipsoid_dimensions = vec3(1.0, 0.5, 2.0);
+vec3  ellipsoid_color      = vec3(0.0, 0.7, 0.0);
+float ellipsod_shininess   = 70.0;
+
+float torus;
+vec3  torus_centre     = vec3(-1.0, -3.0, 0.0);
+vec2  torus_dimensions = vec2(1.0, 0.5);
+vec3  torus_color      = vec3(0.2, 0.7, 0.7);
+float torus_shininess  = 120.0;
+
+float plane;
+vec3  plane_centre    = vec3(-1.0, -1.0, -1.0);
+vec4  plane_normal    = vec4(0.0, 1.0, 0.0, 5.0);
+vec3  plane_color     = vec3(0.8);
+float plane_shininess = 50.0;
+
+float cube_for_sphere;
+vec3  cube_for_sphere_centre     = vec3(0.0);
+vec3  cube_for_sphere_dimensions = vec3(1.0);
+
+float shininess;
+
+//distance functions
 float distance_from_sphere(vec3 p, vec3 c, float r) {
     return length(p - c) - r;
 }
-
 float distance_from_ellipsoid(vec3 p, vec3 c, vec3 r) {
     return (length((p - c)/r) - 1.0) * min(min(r.x,r.y),r.z);
 }
-
 float distance_from_torus(vec3 p, vec2 t) {
     vec2 q = vec2(length(p.xz) - t.x, p.y);
     return length(q) - t.y;
@@ -26,7 +56,6 @@ float distance_from_plane(vec3 p, vec3 c, vec4 n) {
   // n must be normalized
   return dot(p - c, n.xyz) + n.w;
 }
-
 float distance_from_cube(vec3 p, vec3 c, vec3 s) {
     vec3 d = abs(p - c) - s;
 
@@ -35,222 +64,159 @@ float distance_from_cube(vec3 p, vec3 c, vec3 s) {
 
     return insideDistance + outsideDistance;
 }
-
+//changing the final shape
 float intersect(float dist_a, float dist_b) {
     return max(dist_a, dist_b);
 }
-
-float twist_torus(vec3 p, vec3 c, vec2 t, float twists)
-{
+float twist_torus(vec3 p, vec3 c, vec2 t, float twists) {
     float k = cos(twists*(p.y - c.y));
     float s = sin(twists*(p.y - c.y));
     mat2  m = mat2(k, -s, s, k);
     vec3  q = vec3(m*(p.xz - c.xz), p.y - c.y);
     return distance_from_torus(q, t);
 }
-
-float bend_torus(vec3 p, vec3 c, vec2 t, float bends)
-{
+float bend_torus(vec3 p, vec3 c, vec2 t, float bends) {
     float k = cos(bends*(p.y - c.y));
     float s = sin(bends*(p.y - c.y));
     mat2  m = mat2(k, -s, s, k);
     vec3  q = vec3(m*(p.xy - c.xy), (p.z - c.z));
     return distance_from_torus(q, t);
 }
-
+//distance to a surface specified
 float distance_to_surface(vec3 p, int num) {
     if (num == 0) {
         //return distance_from_sphere(p, vec3(0.0), 1.0);
-        return intersect(distance_from_sphere(p / 1.2, vec3(0.0), 1.0) * 1.2, distance_from_cube(p, vec3(0.0), vec3(1.0)));
+        return intersect(distance_from_sphere(p / 1.2, sphere_centre, sphere_radius) * 1.2,
+                         distance_from_cube(p, cube_for_sphere_centre, cube_for_sphere_dimensions));
     } else if (num == 1) {
-        return distance_from_ellipsoid(p,  vec3(2.0, 0.0, -2.0), vec3(1.0, 0.5, 2.0));
+        return distance_from_ellipsoid(p,  ellipsoid_centre, ellipsoid_dimensions);
     } else if (num == 2) {
-        //return distance_from_torus(p, vec3(-1.0, -3.0, 0.0), vec2(1.0, 0.5));
-        return bend_torus(p, vec3(-1.0, -3.0, 0.0), vec2(1.0, 0.5), 0.5);
+        return bend_torus(p, torus_centre, torus_dimensions, 0);
     } else if (num == 3) {
-        return distance_from_plane(p, vec3(-1.0, -1.0, -1.0), vec4(0.0, 1.0, 0.0, 5.0));
+        return distance_from_plane(p, plane_centre, plane_normal);
     }
 }
-
+//minimal distance to any surface
 float min_distance(vec3 p) {
-    return min(min(distance_to_surface(p, 0),
-               distance_to_surface(p, 1)),
-               min(distance_to_surface(p, 2),
-               distance_to_surface(p, 3)));
-}
+    sphere = distance_to_surface(p, 0);
+    ellipsiod = distance_to_surface(p, 1);
+    torus = distance_to_surface(p, 2);
+    plane = distance_to_surface(p, 3);
 
-vec3 calculate_normal(vec3 p, int num)
-{
+    return min(min(sphere, ellipsiod), min(torus, plane));
+}
+//normal for a given point
+vec3 calculate_normal(vec3 p) {
     const vec3 small_step = vec3(0.001, 0.0, 0.0);
     vec3 normal = vec3(0.0);
     //gradients calculation
-    normal.x = distance_to_surface(p + small_step.xyy, num) - distance_to_surface(p - small_step.xyy, num);
-    normal.y = distance_to_surface(p + small_step.yxy, num) - distance_to_surface(p - small_step.yxy, num);
-    normal.z = distance_to_surface(p + small_step.yyx, num) - distance_to_surface(p - small_step.yyx, num);
+    normal.x = min_distance(p + small_step.xyy) - min_distance(p - small_step.xyy);
+    normal.y = min_distance(p + small_step.yxy) - min_distance(p - small_step.yxy);
+    normal.z = min_distance(p + small_step.yyx) - min_distance(p - small_step.yyx);
 
     return normalize(normal);
 }
 
-vec3 phong_light_model(vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p, vec3 ray_pos,
-                       vec3 light_position[NUM_OF_LIGHTS], vec3 light_intensity, int num) {
-    vec3 final_color = vec3(0.0);
-    vec3 normal = calculate_normal(p, num);
-    vec3 viewer_direction = normalize(ray_pos - p);
-
-    for (int i = 0; i < NUM_OF_LIGHTS; i++) {
-        vec3 light_direction = normalize(light_position[i] - p);
-        vec3 reflection_direction = normalize(reflect(-light_direction, normal));
-        float dot_ln = dot(light_direction, normal);
-        float dot_rv = dot(reflection_direction, viewer_direction);
-        final_color += light_intensity * (k_diffuse * dot_ln + k_specular * pow(max(dot_rv, 0.0), alpha));
+vec3 color_of_closest_object(vec3 p) {
+    float d = 1e10;
+    vec3 color = vec3(0.0);
+    if (sphere < d) {
+        d = sphere;
+        color = sphere_color;
+        shininess = sphere_shininess;
     }
-    return final_color;
-}
-
-vec3 phong_illumination(vec3 k_ambient, vec3 k_diffuse, vec3 k_specular, float alpha, vec3 p,
-                        vec3 ray_pos, vec3 light_position[NUM_OF_LIGHTS], int num) {
-    vec3 ambient_light = 0.5 * vec3(1.0, 1.0, 1.0);
-    vec3 color = ambient_light * k_ambient;
-    vec3 light_intensity = vec3(0.45, 0.45, 0.45);
-
-    color += phong_light_model(k_diffuse, k_specular, alpha, p, ray_pos,
-                               light_position, light_intensity, num);
+    if (ellipsiod < d) {
+        d = ellipsiod;
+        color = ellipsoid_color;
+        shininess = ellipsod_shininess;
+    }
+    if (torus < d) {
+        d = torus;
+        color = torus_color;
+        shininess = torus_shininess;
+    }
+    if (plane < d) {
+        d = plane;
+        color = plane_color;
+        shininess = plane_shininess;
+    }
     return color;
 }
+//to prevent self-illumination
+vec3 color_lerp(vec3 p) {
+    vec3 color = vec3(0.0);
 
+    float sphere_weight = 0.0;
+    float ellipsiod_weight = 0.0;
+    float torus_weight = 0.0;
+    float plane_weight = 0.0;
 
-float ambient_occlusion(vec3 pos, vec3 normal)
-{
-	float occ = 0.0;
-    float sca = 1.0;
-    for(int i = 0; i < 5; i++)
-    {
-        float h = 0.001 + 0.15*float(i) / 4.0;
-        float d = min_distance(pos + h*normal);
-        occ += (h - d)*sca;
-        sca *= 0.95;
-    }
-    return clamp(1.0 - 1.5*occ, 0.0, 1.0);
+    float eps = 0.01;
+    float GI = 0.7;
+    if (sphere > eps) sphere_weight = GI/(sphere + 1.0);
+    if (ellipsiod > eps) ellipsiod_weight = GI/(ellipsiod + 1.0);
+    if (torus > eps) torus_weight = GI/(torus + 1.0);
+    if (plane > eps) plane_weight = GI/(plane + 1.0);
+
+    color = sphere_color * sphere_weight +
+            ellipsoid_color * ellipsiod_weight +
+            torus_color * torus_weight +
+            plane_color * plane_weight;
+    return color * color * color * 0.15;
 }
 
-float soft_shadow(vec3 light_pos, vec3 light_dir, float min_t, float max_t, float k)
-{
-	float res = 1.0;
-    float t = min_t;
-    float ph = 1e10; // big, such that y = 0 on the first iteration
-
-    for(int i = 0; i < 32; i++ )
-    {
-        float distance = min_distance(light_pos + light_dir * t);
-
-        float y = distance*distance / (2.0*ph);
-        float d = sqrt(distance*distance - y*y);
-        res = min(res, k*d / max(0.0, t - y));
-        ph = distance;
-
-        t += distance;
-
-        if(res < 0.0001 || t > max_t) break;
-
+vec3 intersection_point(vec3 ray_pos, vec3 ray_dir) {
+    float d, t = 0.5;
+    for (int i = 0; i < 175; i++) {
+        d = min_distance(ray_pos + t*ray_dir);
+        if (abs(d) < 0.01) return ray_pos + t*ray_dir;
+        t += d;
     }
-    return clamp(res, 0.0, 1.0);
+    return ray_pos + t * ray_dir;
+}
+
+float ambient_occlusion(vec3 p, vec3 n){
+    const int steps = 3;
+    const float delta = 0.5;
+
+    float a = 0.0;
+    float weight = 0.75;
+    float m;
+    for(int i = 1; i <= steps; i++) {
+        float d = (float(i) / float(steps)) * delta;
+        a += weight*(d - min_distance(p + n*d));
+        weight *= 0.5;
+    }
+    return clamp(1.0 - a, 0.0, 1.0);
+}
+
+float soft_shadow(in vec3 ro, in vec3 rd){
+    float res = 1.0, t = 0.15; // t=0.15 -> no banding on my stock x.org drivers
+    for(int i = 0; i < 16; i++) {
+        float h = min_distance(ro + rd*t);
+        if(h < 0.01) return 0.0;
+        res = min(res, 2.0 * h/t);
+        t += h*0.9;
+    }
+    return res;
 }
 
 vec3 ray_marching(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
-    float total_distance_traveled = 0.0;
-    const int NUM_OF_STEPS = 175;
-    const float MIN_HIT_DIST = 0.001;
-    const float MAX_TRACE_DIST = 1000.0;
-    vec3 final_color = vec3(0.0);
-
-    for (int i = 0; i < NUM_OF_STEPS; i++) {
-        vec3 current_position = ray_pos + total_distance_traveled * ray_dir;
-
-        float distance_to_sphere = distance_to_surface(current_position, 0);
-        float distance_to_ellipsoid = distance_to_surface(current_position, 1);
-        float distance_to_torus = distance_to_surface(current_position, 2);
-        float distance_to_plane = distance_to_surface(current_position, 3);
-
-        if (distance_to_sphere < distance_to_ellipsoid &&
-            distance_to_sphere < distance_to_torus &&
-            distance_to_sphere < distance_to_plane) {
-            if (distance_to_sphere < MIN_HIT_DIST) { //hit
-                vec3 k_ambient = vec3(0.3, 0.15, 0.15);
-                vec3 k_diffuse = vec3(0.7, 0.2, 0.2);
-                vec3 k_specular = vec3(1.0, 1.0, 1.0);
-                float shininess = 10.0;
-                final_color += phong_illumination(k_ambient, k_diffuse, k_specular, shininess,
-                                          current_position, ray_pos, light_position, 0);
-                return final_color;
-            }
-            if (total_distance_traveled > MAX_TRACE_DIST) { //miss
-                break;
-            }
-            total_distance_traveled += distance_to_sphere;
-        } else if (distance_to_ellipsoid < distance_to_sphere &&
-                   distance_to_ellipsoid < distance_to_torus &&
-                   distance_to_ellipsoid  < distance_to_plane){
-            if (distance_to_ellipsoid < MIN_HIT_DIST) { //hit
-                vec3 k_ambient = vec3(0.15, 0.3, 0.15);
-                vec3 k_diffuse = vec3(0.2, 0.7, 0.2);
-                vec3 k_specular = vec3(1.0, 1.0, 1.0);
-                float shininess = 10.0;
-                final_color += phong_illumination(k_ambient, k_diffuse, k_specular, shininess,
-                                          current_position, ray_pos, light_position, 1);
-                return final_color;
-            }
-            if (total_distance_traveled > MAX_TRACE_DIST) { //miss
-                break;
-            }
-            total_distance_traveled += distance_to_ellipsoid;
-        } else if (distance_to_torus < distance_to_sphere &&
-                   distance_to_torus < distance_to_ellipsoid &&
-                   distance_to_torus  < distance_to_plane){
-            if (distance_to_torus < MIN_HIT_DIST) {
-                vec3 k_ambient = vec3(0.15, 0.3, 0.3);
-                vec3 k_diffuse = vec3(0.2, 0.7, 0.7);
-                vec3 k_specular = vec3(1.0, 1.0, 1.0);
-                float shininess = 10.0;
-                final_color += phong_illumination(k_ambient, k_diffuse, k_specular, shininess,
-                                          current_position, ray_pos, light_position, 2);
-                return final_color;
-            }
-            if (total_distance_traveled > MAX_TRACE_DIST) { //miss
-                break;
-            }
-            total_distance_traveled += distance_to_torus;
-        } else {
-            if (distance_to_plane < MIN_HIT_DIST) {
-                vec3 k_ambient = vec3(0.2, 0.2, 0.2);
-                vec3 k_diffuse = vec3(0.7, 0.7, 0.7);
-                vec3 k_specular = vec3(1.0, 1.0, 1.0);
-                float shininess = 10.0;
-                final_color += phong_illumination(k_ambient, k_diffuse, k_specular, shininess,
-                                          current_position, ray_pos, light_position, 3);
-                return final_color;
-            }
-            if (total_distance_traveled > MAX_TRACE_DIST) { //miss
-                break;
-            }
-            total_distance_traveled += distance_to_plane;
-        }
-    }
-    return vec3(0.0, 0.0, 0.1);
+    vec3 pos = intersection_point(ray_pos, ray_dir);
+    vec3 normal = calculate_normal(pos);
+    vec3 color = color_of_closest_object(pos);
+    vec3 gi = color_lerp(pos);
+    //float shininess = 50.0;
+    vec3 light_dir = normalize(light_position[0] - pos);
+    vec3 viewer_dir = normalize(ray_pos - pos);
+    vec3 reflection = normalize(light_dir + viewer_dir);
+    float diffuse = dot(normal, light_dir);
+    float specular = max(0.0, pow(dot(normal, reflection), shininess)) * float(diffuse > 0.0);
+    diffuse = 0.5 + 0.5 * diffuse;
+    float ambient_occ = ambient_occlusion(pos, normal);
+    float shadow = soft_shadow(pos, normalize(light_position[0]));
+    return vec3(diffuse * (0.5 + 0.5 * shadow) * ambient_occ * (color + gi) + specular);
 }
-
-/**
-TODO:
-* add variables (global? passed to functions? defined?) for sphere and ellipsoid sizes
-* same for coordinates, colors and light position, etc.
-* instead of light_position 1 and 2 try to make array => change computing of color to cycle in phong_light_model
-
-OBJECT 0: sphere
-OBJECT 1: ellipsoid
-OBJECT 2: torus
-OBJECT 3: plane
-OBJECT 4: ???
-*/
-
 
 void main() {
     vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
@@ -263,7 +229,7 @@ void main() {
     light_position[0] = vec3(2.0, 4.0, 4.0);
     light_position[1] = vec3(-7.0, 7.0, -10.0);
 
-    vec3 shader_color = ray_marching(ray_pos, ray_dir, light_position);
-    color = vec4(shader_color, 1.0);
+    color = vec4(ray_marching(ray_pos, ray_dir, light_position), 1.0);
 }
+
 
