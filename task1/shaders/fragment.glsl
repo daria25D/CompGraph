@@ -176,7 +176,7 @@ vec3 intersection_point(vec3 ray_pos, vec3 ray_dir) {
 }
 
 float ambient_occlusion(vec3 p, vec3 n){
-    const int steps = 3;
+    const int steps = 8;
     const float delta = 0.5;
 
     float a = 0.0;
@@ -190,10 +190,10 @@ float ambient_occlusion(vec3 p, vec3 n){
     return clamp(1.0 - a, 0.0, 1.0);
 }
 
-float soft_shadow(in vec3 ro, in vec3 rd){
-    float res = 1.0, t = 0.15; // t=0.15 -> no banding on my stock x.org drivers
+float soft_shadow(in vec3 ray_pos, in vec3 ray_dir){
+    float res = 1.0, t = 0.15;
     for(int i = 0; i < 16; i++) {
-        float h = min_distance(ro + rd*t);
+        float h = min_distance(ray_pos + ray_dir*t);
         if(h < 0.01) return 0.0;
         res = min(res, 2.0 * h/t);
         t += h*0.9;
@@ -206,17 +206,27 @@ vec3 ray_marching(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]
     vec3 normal = calculate_normal(pos);
     vec3 color = color_of_closest_object(pos);
     vec3 gi = color_lerp(pos);
+    vec3 final_color = vec3(1.0);
     //float shininess = 50.0;
-    vec3 light_dir = normalize(light_position[0] - pos);
-    vec3 viewer_dir = normalize(ray_pos - pos);
-    vec3 reflection = normalize(light_dir + viewer_dir);
-    float diffuse = dot(normal, light_dir);
-    float specular = max(0.0, pow(dot(normal, reflection), shininess)) * float(diffuse > 0.0);
-    diffuse = 0.5 + 0.5 * diffuse;
-    float ambient_occ = ambient_occlusion(pos, normal);
-    float shadow = soft_shadow(pos, normalize(light_position[0]));
-    return vec3(diffuse * (0.5 + 0.5 * shadow) * ambient_occ * (color + gi) + specular);
+    for (int i = 0; i < NUM_OF_LIGHTS; i++) {
+
+        vec3 light_dir = normalize(light_position[i] - pos);
+        vec3 viewer_dir = normalize(ray_pos - pos);
+        vec3 reflection = normalize(light_dir + viewer_dir);
+        float diffuse = dot(normal, light_dir);
+        float specular = max(0.0, pow(dot(normal, reflection), shininess)) * float(diffuse > 0.0);
+        diffuse = 0.5 + 0.5 * diffuse;
+        float ambient_occ = ambient_occlusion(pos, normal);
+        float shadow = soft_shadow(pos, normalize(light_position[i]));
+        final_color *= vec3(diffuse * (0.5 + 0.5 * shadow) * ambient_occ * (color + gi) + specular);
+    }
+    return final_color;
 }
+
+/**
+TODO:
+* try to think of how to add a second sourse of light
+*/
 
 void main() {
     vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
