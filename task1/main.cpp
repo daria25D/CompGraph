@@ -7,7 +7,6 @@
 #define GLFW_DLL
 
 #include <GLFW/glfw3.h>
-#include <SOIL/SOIL.h>
 #include <random>
 
 static GLsizei WIDTH = 512, HEIGHT = 512; //размеры окна
@@ -15,8 +14,9 @@ static GLsizei WIDTH = 512, HEIGHT = 512; //размеры окна
 using namespace LiteMath;
 
 float3 camera_position(0, 0, 5);
-float cam_rot[3] = {0, 0, 0};
+float cam_rot[2] = {0, 0};
 float mx = float(WIDTH), my = HEIGHT/2.0;
+float3 camera_movement(0.0, 0.0, 0.0);
 bool keys[350];
 
 void windowResize(GLFWwindow *window, int width, int height) {
@@ -72,7 +72,7 @@ float to_rads(const float &angle) {
 
 void move_camera() {
     // Camera controls
-    float3 camera_movement(0.0, 0.0, 0.0);
+    //float3 camera_movement(0.0, 0.0, 0.0);
 
     GLfloat camera_speed = 0.25f;
     if (keys[GLFW_KEY_LEFT_SHIFT])
@@ -80,26 +80,26 @@ void move_camera() {
     if (!keys[GLFW_KEY_LEFT_SHIFT])
         camera_speed = 0.25f;
     if (keys[GLFW_KEY_W]) {
-        camera_movement.x += (camera_speed * sin(to_rads(cam_rot[1]))) * cos(to_rads(cam_rot[0]));
-        camera_movement.y += camera_speed * sin(to_rads(cam_rot[0])) * -1.0f;//* sin(to_rads(cam_rot[0]));
-        camera_movement.z += (camera_speed * cos(to_rads(cam_rot[1])) * -1.0f ) * cos(to_rads(cam_rot[0]));
+        camera_movement.x = (camera_speed * sin(to_rads(cam_rot[0]))) * cos(to_rads(cam_rot[1]));
+        camera_movement.z = (camera_speed * cos(to_rads(cam_rot[0])) * -1.0f ) * cos(to_rads(cam_rot[1]));
     }
     if (keys[GLFW_KEY_S]) {
-        camera_movement.x += (camera_speed * sin(to_rads(cam_rot[1])) * -1.0f) * cos(to_rads(cam_rot[0]));
-        camera_movement.y += camera_speed * sin(to_rads(cam_rot[0]));
-        camera_movement.z += (camera_speed * cos(to_rads(cam_rot[1]))) * cos(to_rads(cam_rot[0]));
+        camera_movement.x = (camera_speed * sin(to_rads(cam_rot[0])) * -1.0f) * cos(to_rads(cam_rot[1]));
+        camera_movement.z = (camera_speed * cos(to_rads(cam_rot[0]))) * cos(to_rads(cam_rot[1]));
     }
     if (keys[GLFW_KEY_A]) {
-        camera_movement.x += -camera_speed * cos(to_rads(cam_rot[1]));
-        camera_movement.z += -camera_speed * sin(to_rads(cam_rot[1]));
+        camera_movement.x = -camera_speed * cos(to_rads(cam_rot[1]));
+        camera_movement.z = -camera_speed * sin(to_rads(cam_rot[1]));
     }
     if (keys[GLFW_KEY_D]) {
-        camera_movement.x += camera_speed * cos(to_rads(cam_rot[1]));
-        camera_movement.z += camera_speed * sin(to_rads(cam_rot[1]));
+        camera_movement.x = camera_speed * cos(to_rads(cam_rot[1]));
+        camera_movement.z = camera_speed * sin(to_rads(cam_rot[1]));
+    }
+    if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D]) {
+        camera_movement = float3(0.0, 0.0, 0.0);
     }
 
-
-    camera_position += camera_movement;
+    //camera_position += camera_movement;
 
 }
 
@@ -217,13 +217,13 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GL_CHECK_ERRORS;
-
         program.StartUseShader();
         GL_CHECK_ERRORS;
         //std::cout << camera_position.x << " " << camera_position.y << " " << camera_position.z << std::endl;
         float4x4 camRotMatrix = mul(rotate_Y_4x4(-cam_rot[1]), rotate_X_4x4(+cam_rot[0]));
         float4x4 camTransMatrix = translate4x4(camera_position);
         float4x4 rayMatrix = mul(camTransMatrix, camRotMatrix);
+        camera_position += mul(camRotMatrix, camera_movement);
         //float4x4 matr = mul(camRotMatrix, camTransMatrix);
         //rayMatrix = mul(matr, rayMatrix);
         //rayMatrix = mul(rayMatrix, camRotMatrix);
