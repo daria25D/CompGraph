@@ -13,7 +13,7 @@ static GLsizei WIDTH = 512, HEIGHT = 512; //размеры окна
 
 using namespace LiteMath;
 
-float3 camera_position(0, 0, 5);
+float3 camera_position(0, 0, 0);
 float cam_rot[2] = {0, 0};
 float mx = float(WIDTH), my = HEIGHT/2.0;
 float3 camera_movement(0.0, 0.0, 0.0);
@@ -27,7 +27,7 @@ void windowResize(GLFWwindow *window, int width, int height) {
 }
 
 static void mouseMove(GLFWwindow *window, double xpos, double ypos) {
-    GLfloat mouse_sensitivity  = 37.0f;
+    GLfloat mouse_sensitivity  = 35.0f;
 
     float horiz_movement = float(xpos * 0.15f - mx);
     float vert_movement  = float(ypos * 0.15f - my);
@@ -95,7 +95,19 @@ void move_camera() {
         camera_movement.x = camera_speed * cos(to_rads(cam_rot[1]));
         camera_movement.z = camera_speed * sin(to_rads(cam_rot[1]));
     }
-    if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D]) {
+    if (keys[GLFW_KEY_Q]) {
+        camera_position.y += camera_speed;
+    }
+    if (keys[GLFW_KEY_E]) {
+        camera_position.y -= camera_speed;
+    }
+    if (keys[GLFW_KEY_R]) {
+        cam_rot[1] -= 0.4 * camera_speed;
+    }
+    if (keys[GLFW_KEY_F]) {
+        cam_rot[1] += 0.4 * camera_speed;
+    }
+    if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D] && !keys[GLFW_KEY_Q] && !keys[GLFW_KEY_E]) {
         camera_movement = float3(0.0, 0.0, 0.0);
     }
 
@@ -223,16 +235,13 @@ int main(int argc, char **argv) {
         float4x4 camRotMatrix = mul(rotate_Y_4x4(-cam_rot[1]), rotate_X_4x4(+cam_rot[0]));
         float4x4 camTransMatrix = translate4x4(camera_position);
         float4x4 rayMatrix = mul(camTransMatrix, camRotMatrix);
+        float y = camera_position.y;
         camera_position += mul(camRotMatrix, camera_movement);
-        //float4x4 matr = mul(camRotMatrix, camTransMatrix);
-        //rayMatrix = mul(matr, rayMatrix);
-        //rayMatrix = mul(rayMatrix, camRotMatrix);
+        camera_position.y = y;
         //отслеживать нажата ли кнопка или отпущена, матрицу изменять в цикле
         //матрицу  сдвига умножать на матрицу сдвига и на матрицу поворота текущую слева
         //program.SetUniform("radius", 0.5f);
         program.SetUniform("g_rayMatrix", rayMatrix);
-        //float cam_pos[3] = {camera_position.x, camera_position.y, camera_position.z};
-        //program.SetUniform("cam_pos", cam_pos);
         GL_CHECK_ERRORS;
         program.SetUniform("g_screenWidth", WIDTH);
         GL_CHECK_ERRORS;

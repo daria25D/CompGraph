@@ -166,12 +166,12 @@ vec3 color_lerp(vec3 p) {
 }
 
 vec3 intersection_point(vec3 ray_pos, vec3 ray_dir) {
-    float d, t = 0.5;
+    float d, t = 0.0;
     for (int i = 0; i < 175; i++) {
         d = min_distance(ray_pos + t*ray_dir);
-        if (abs(d) < 0.01) return ray_pos + t*ray_dir;
+        if (abs(d) < 0.01) return ray_pos + t*ray_dir; //min_dist
         t += d;
-        if (abs(d) > 100) return ray_pos + t*ray_dir;
+        if (abs(d) > 100) return ray_pos + t*ray_dir; //max_dist
     }
     return ray_pos + t * ray_dir;
 }
@@ -208,7 +208,6 @@ vec3 ray_marching(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]
     vec3 color = color_of_closest_object(pos);
     vec3 gi = color_lerp(pos);
     vec3 final_color = vec3(0.0);
-    //float shininess = 50.0;
     vec3 light_dir1 = normalize(light_position[0] - pos);
     vec3 light_dir2 = normalize(light_position[1] - pos);
     vec3 viewer_dir = normalize(ray_pos - pos);
