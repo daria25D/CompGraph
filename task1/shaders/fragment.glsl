@@ -17,15 +17,15 @@ float sphere_radius     = 1.0;
 vec3  sphere_color      = vec3(0.9, 0.1, 0.1);
 float sphere_shininess  = 100.0;
 float sphere_diffuse    = 0.33;
-float sphere_specular   = 0.4;
+float sphere_specular   = 0.9;
 float sphere_ambient    = 0.33;
 float sphere_occlusion  = 5.0;
-float sphere_reflection = 0.2;
+float sphere_reflection = 0.0;
 
 
 float ellipsoid;
-vec3  ellipsoid_centre     = vec3(2.0, 0.0, -2.0);
-vec3  ellipsoid_dimensions = vec3(1.0, 0.5, 2.0);
+vec3  ellipsoid_centre     = vec3(2.0, -2.0, 0.0);
+vec3  ellipsoid_dimensions = vec3(1.0, 2.0, 0.5);
 vec3  ellipsoid_color      = vec3(0.0, 0.7, 0.0);
 float ellipsoid_shininess  = 2.0;
 float ellipsoid_diffuse    = 0.4;
@@ -35,30 +35,41 @@ float ellipsoid_occlusion  = 4.0;
 float ellipsoid_reflection = 0.0;
 
 float torus;
-vec3  torus_centre     = vec3(-1.0, -3.0, 0.0);
+vec3  torus_centre     = vec3(-1.0, -5.0, 1.0);
 vec2  torus_dimensions = vec2(1.0, 0.5);
 vec3  torus_color      = vec3(0.2, 0.7, 0.7);
 float torus_shininess  = 50.0;
 float torus_diffuse    = 0.33;
-float torus_specular   = 0.33;
+float torus_specular   = 0.5;
 float torus_ambient    = 0.33;
 float torus_occlusion  = 4.0;
-float torus_reflection = 1.0;
+float torus_reflection = 0.0;
 
 float plane;
 vec3  plane_centre     = vec3(-1.0, -1.0, -1.0);
 vec4  plane_normal     = vec4(0.0, 1.0, 0.0, 5.0);
 vec3  plane_color      = vec3(0.8);
-float plane_shininess  = 1.0;
+float plane_shininess  = 2.0;
 float plane_diffuse    = 0.33;
-float plane_specular   = 0.2;
+float plane_specular   = 0.5;
 float plane_ambient    = 0.33;
 float plane_occlusion  = 5.0;
-float plane_reflection = 0.1;
+float plane_reflection = 1.0;
 
 float cube_for_sphere;
 vec3  cube_for_sphere_centre     = vec3(0.0, 0.0, 0.0);
 vec3  cube_for_sphere_dimensions = vec3(1.0);
+
+float cube;
+vec3  cube_centre     = vec3(2.0, -5.0, 0.0);
+vec3  cube_dimensions = vec3(1.0);
+vec3  cube_color      = vec3(0.5, 0.0, 0.5);
+float cube_shininess  = 3.0;
+float cube_diffuse    = 0.33;
+float cube_specular   = 0.5;
+float cube_ambient    = 0.33;
+float cube_occlusion  = 4.0;
+float cube_reflection = 0.0;
 
 float shininess;
 float k_diffuse;
@@ -120,6 +131,8 @@ float distance_to_surface(vec3 p, int num) {
         return bend_torus(p, torus_centre, torus_dimensions, 0);
     } else if (num == 3) {
         return distance_from_plane(p, plane_centre, plane_normal);
+    } else if (num == 4) {
+        return distance_from_cube(p, cube_centre, cube_dimensions);
     }
 }
 //minimal distance to any surface
@@ -128,8 +141,9 @@ float min_distance(vec3 p) {
     ellipsoid = distance_to_surface(p, 1);
     torus = distance_to_surface(p, 2);
     plane = distance_to_surface(p, 3);
+    cube = distance_to_surface(p, 4);
 
-    return min(min(sphere, ellipsoid), min(torus, plane));
+    return min(cube, min(min(sphere, ellipsoid), min(torus, plane)));
 }
 //normal for a given point
 vec3 calculate_normal(vec3 p) {
@@ -185,6 +199,15 @@ vec3 color_of_closest_object(vec3 p) {
         k_specular = plane_ambient;
         k_occlusion = plane_occlusion;
         k_reflection = plane_reflection;
+    } if (cube < d) {
+        d = cube;
+        color = cube_color;
+        shininess = cube_shininess;
+        k_diffuse = cube_diffuse;
+        k_ambient = cube_ambient;
+        k_specular = cube_ambient;
+        k_occlusion = cube_occlusion;
+        k_reflection = cube_reflection;
     }
     return color;
 }
@@ -196,6 +219,7 @@ vec3 color_lerp(vec3 p) {
     float ellipsoid_weight = 0.0;
     float torus_weight = 0.0;
     float plane_weight = 0.0;
+    float cube_weight = 0.0;
 
     float eps = 0.01;
     float GI = 0.7;
@@ -203,11 +227,13 @@ vec3 color_lerp(vec3 p) {
     if (ellipsoid > eps) ellipsoid_weight = GI/(ellipsoid + 1.0);
     if (torus > eps) torus_weight = GI/(torus + 1.0);
     if (plane > eps) plane_weight = GI/(plane + 1.0);
+    if (cube > eps) cube_weight - GI/(cube + 1.0);
 
     color = sphere_color * sphere_weight +
             ellipsoid_color * ellipsoid_weight +
             torus_color * torus_weight +
-            plane_color * plane_weight;
+            plane_color * plane_weight +
+            cube_color * cube_weight;
     return color * color * color * 0.15;
 }
 
@@ -217,7 +243,7 @@ float intersection_point(vec3 ray_pos, vec3 ray_dir) {
         d = min_distance(ray_pos + t*ray_dir);
         if (abs(d) < 0.01) return t;//ray_pos + t*ray_dir; //min_dist
         t += d;
-        if (abs(d) > 120) return t;//ray_pos + t*ray_dir; //max_dist
+        if (abs(d) > MAX_DIST) return t;//ray_pos + t*ray_dir; //max_dist
     }
     return t;//ray_pos + t * ray_dir;
 }
@@ -248,68 +274,14 @@ float soft_shadow(vec3 ray_pos, vec3 ray_dir){
     return clamp(res, 0.0, 1.0);
 }
 
-vec3 reflection(vec3 rro, vec3 ray_dir, vec3 normal, vec3 ray_pos, vec3 light_position)
-{
-    vec3 res = vec3(0.80, 0.75, 0.70)*0.35; //ambient reflection
-    int chk = 1;
-    for(int j = 0; j<3; j++)		// 3 reflections
-    {
-		ray_dir = reflect(ray_dir, normal);
-		float tmax = 50.0;
-   		float t = 0.1;
-    	vec3 pos = rro;
-    	float d = 0.0;
-    	if(chk == 1)
-    	{
-			for(int i = 0; i<256; i++ )
-			{
-        		if(t>=tmax) break;
-				pos = rro+ray_dir*t;
-				d = min_distance(pos);
-				if(d < 0.001) break;
-				t += d*(0.35+t/tmax);
-			}
-    	}
-    	chk = 0;
-    	if(d < 0.001)
-		{
-    		float ks = 0.1;
-			float kd = 0.1;
-			float ka = 0.04;
-        	float a = 3.0;
-			float aof = 0.06;
-			float ss = 0.2;
-            vec3 color = color_of_closest_object(pos);
-			vec3 l = normalize(light_position-pos);
-			normal = calculate_normal(pos);
-			vec3 v = normalize(ray_pos - pos);
-        	vec3 h = normalize(l+v);
-
-			float illumination  = ka*ambient_occlusion(pos, normal, aof)
-								+ kd*max(dot(l,normal),0.0)
-                         	    + ks*pow(max(dot(normal,h),0.0),a)
-								+ ss*soft_shadow(pos, light_position);
-        	illumination = max(illumination, 0.0);
-			res += color*illumination*(1.0/pow(2.0,float(j)));
-        	chk = 1;
-        	rro = pos;
-		}
-    }
-	return res;
-}
-
 
 vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
     float t = intersection_point(ray_pos, ray_dir);
     vec3 pos = ray_pos + t*ray_dir;
-    /*vec3 final_color = phong(ray_pos, ray_dir, pos, light_position[0]);
-    final_color += phong(ray_pos, ray_dir, pos, light_position[1]);*/
-    //float shadow = 0.5*soft_shadow(ray_pos, light_position[0]) + 0.5*soft_shadow(ray_pos, light_position[1]);
-    //final_color *= shadow;
     vec3 normal = calculate_normal(pos);
     vec3 color = color_of_closest_object(pos);
     vec3 gi = color_lerp(pos);
-    if (t > MAX_DIST) color = vec3(0.8, 0.8, 0.8);
+    if (t > MAX_DIST) {color = vec3(0.8, 0.8, 0.8); gi = vec3(0.0);}
     vec3 final_color = vec3(0.0);
     vec3 light_dir1 = normalize(light_position[0] - pos);
     vec3 light_dir2 = normalize(light_position[1] - pos);
@@ -329,8 +301,10 @@ vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
     float ambient_occ = ambient_occlusion(pos, normal, k_occlusion);
     float shadow1 = soft_shadow(pos, normalize(light_position[0]));
     float shadow2 = soft_shadow(pos, normalize(light_position[1]));
-    final_color += vec3(((k_diffuse*(diffuse1 + diffuse2) + k_ambient*ambient_occ) * (color + gi)) * 0.5*(shadow1 + shadow2) + k_specular*(specular1 + specular2)) ;
-    final_color *= exp(-0.0005*t*t);
+    vec3 reflect = vec3(0.0);
+    final_color += vec3(((k_diffuse*(diffuse1 + diffuse2) + k_ambient*ambient_occ + k_reflection*reflect) * (color + gi))
+                        * 0.5*(shadow1 + shadow2) + k_specular*(specular1 + specular2)) ;
+    final_color *= exp(-0.00005*t*t);
     return final_color;
 }
 
