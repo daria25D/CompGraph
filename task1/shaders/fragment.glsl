@@ -171,6 +171,7 @@ vec3 intersection_point(vec3 ray_pos, vec3 ray_dir) {
         d = min_distance(ray_pos + t*ray_dir);
         if (abs(d) < 0.01) return ray_pos + t*ray_dir;
         t += d;
+        if (abs(d) > 100) return ray_pos + t*ray_dir;
     }
     return ray_pos + t * ray_dir;
 }
