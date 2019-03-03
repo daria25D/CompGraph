@@ -13,6 +13,8 @@ const float MAX_DIST = 50;
 const float REFRACTION_OUTSIDE = 1.0002;
 const float REFLECTIVITY = 0.01;
 
+bool count_refract = true;
+
 struct Material {
     vec3  color;
     float shininess;
@@ -102,10 +104,8 @@ float twist_torus(vec3 p, vec3 c, vec2 t, float twists) {
 //minimal distance to any surface
 vec2 min_distance(vec3 p) {
     vec2 res = vec2(MAX_DIST*20, 0);
-    float dist = smooth_union(distance_from_sphere(p, sphere_centre, sphere_radius),
-                             distance_from_octahedron(p - octahedron_for_sphere_centre, octahedron_for_sphere_dimension), 0.5);
-    if (res.x > dist) res = vec2(dist, SPHERE);
-    dist = distance_from_ellipsoid(p,  ellipsoid_centre, ellipsoid_dimensions);
+
+    float dist = distance_from_ellipsoid(p,  ellipsoid_centre, ellipsoid_dimensions);
     if (res.x > dist) res = vec2(dist, ELLIPSOID);
     dist = twist_torus(p, torus_centre, torus_dimensions, 0);
     if (res.x > dist) res = vec2(dist, TORUS);
@@ -113,6 +113,9 @@ vec2 min_distance(vec3 p) {
     if (res.x > dist) res = vec2(dist, PLANE);
     dist = distance_from_cube(p, cube_centre, cube_dimensions);
     if (res.x > dist) res = vec2(dist, CUBE);
+    if (count_refract) dist = smooth_union(distance_from_sphere(p, sphere_centre, sphere_radius),
+                                 distance_from_octahedron(p - octahedron_for_sphere_centre, octahedron_for_sphere_dimension), 0.5);
+    if (res.x > dist) res = vec2(dist, SPHERE);
 
     return res;
 }
@@ -130,7 +133,7 @@ vec3 calculate_normal(vec3 p) {
 
 Material sphere_material() {
     Material sphere_mat;
-    sphere_mat.color        = vec3(0.9, 0.1, 0.1);
+    sphere_mat.color        = vec3(0.9, 0.3, 0.3);
     sphere_mat.shininess    = 100.0;
     sphere_mat.k_diffuse    = 0.33;
     sphere_mat.k_specular   = 0.9;
@@ -250,12 +253,12 @@ vec3 glass_refraction(vec3 pos, vec3 ray_dir, vec3 normal, float k_refract, vec3
     vec3 refl_normal = calculate_normal(refl_pos);
     float refl_occ = ambient_occlusion(refl_pos, refl_normal, material.k_occlusion);
     refl_color *= refl_occ;
-
+    count_refract = false;
     vec3 refr = refract(ray_dir, normal, 1.0 / k_refract);
     vec2 robj = intersection_point(pos, refr);
     vec3 r_pos = pos + robj.x*refr;
     vec3 r_normal = calculate_normal(r_pos);
-
+    count_refract = true;
     vec3 color = color_of_closest_object(robj);
     float occ = ambient_occlusion(r_pos, r_normal, material.k_occlusion);
     color *= main_color * occ;
@@ -296,8 +299,8 @@ vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
         //vec3 refract_dir = refract(ray_dir, normal, material.k_refraction / REFRACTION_OUTSIDE);
         //internal_color = internal_ray_color(ray_pos + refract_dir*0.001, refract_dir) * refracted;
         final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
-                             * 0.5*(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
-        //final_color = glass_refraction(pos, ray_dir, normal, material.k_refraction, final_color);
+                             *(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
+        final_color = glass_refraction(pos, ray_dir, normal, material.k_refraction, final_color);
     } else {
         final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
                               * 0.5*(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
