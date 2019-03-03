@@ -26,10 +26,10 @@ struct Material {
 };
 //objects
 int   SPHERE=1; //current distance
-vec3  sphere_centre     = vec3(-2.0, -4.8, 2.0);
+vec3  sphere_centre     = vec3(0.3, -3.0, 2.5);
 float sphere_radius     = 0.9;
 
-vec3   octahedron_for_sphere_centre    = vec3(-2.0, -4.8, 2.0);
+vec3   octahedron_for_sphere_centre    = vec3(0.3, -3.0, 2.5);
 float  octahedron_for_sphere_dimension = 1.2;
 
 int   ELLIPSOID=2;
@@ -133,11 +133,11 @@ vec3 calculate_normal(vec3 p) {
 
 Material sphere_material() {
     Material sphere_mat;
-    sphere_mat.color        = vec3(0.9, 0.3, 0.3);
+    sphere_mat.color        = vec3(0.9, 0.8, 0.8);
     sphere_mat.shininess    = 100.0;
-    sphere_mat.k_diffuse    = 0.33;
+    sphere_mat.k_diffuse    = 0.5;
     sphere_mat.k_specular   = 0.9;
-    sphere_mat.k_ambient    = 0.33;
+    sphere_mat.k_ambient    = 0.5;
     sphere_mat.k_occlusion  = 5.0;
     sphere_mat.k_refraction = 1.2;
     return sphere_mat;
