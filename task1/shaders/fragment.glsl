@@ -25,15 +25,15 @@ struct Material {
     float k_refraction;
 };
 //objects
-int   SPHERE=1; //current distance
-vec3  sphere_centre     = vec3(0.3, -3.0, 2.5);
-float sphere_radius     = 0.9;
+int   DIAMOND=1;
+vec3  diamond_centre     = vec3(2.0, -0.45, 0.0);
+float diamond_radius     = 0.7;
 
-vec3   octahedron_for_sphere_centre    = vec3(0.3, -3.0, 2.5);
-float  octahedron_for_sphere_dimension = 1.2;
+vec3   octahedron_for_diamond_centre    = vec3(2.0, -1.25, 0.0);
+float  octahedron_for_diamond_dimension = 0.87;
 
 int   ELLIPSOID=2;
-vec3  ellipsoid_centre     = vec3(2.0, -0.95, 0.0);
+vec3  ellipsoid_centre     = vec3(2.0, -4.5, 1.5);
 vec3  ellipsoid_dimensions = vec3(0.5, 0.3, 0.3);
 
 int   TORUS=3;
@@ -89,10 +89,7 @@ float distance_from_octahedron(vec3 p, float s) {
 float intersect(float dist_a, float dist_b) {
     return max(dist_a, dist_b);
 }
-float smooth_union(float d1, float d2, float k) {
-    float h = clamp( 0.5 + 0.5*(d2 - d1) / k, 0.0, 1.0 );
-    return mix(d2, d1, h) - k*h * (1.0 - h);
-}
+
 float twist_torus(vec3 p, vec3 c, vec2 t, float twists) {
     float k = cos(twists*(p.y - c.y));
     float s = sin(twists*(p.y - c.y));
@@ -113,9 +110,9 @@ vec2 min_distance(vec3 p) {
     if (res.x > dist) res = vec2(dist, PLANE);
     dist = distance_from_cube(p, cube_centre, cube_dimensions);
     if (res.x > dist) res = vec2(dist, CUBE);
-    if (count_refract) dist = smooth_union(distance_from_sphere(p, sphere_centre, sphere_radius),
-                                 distance_from_octahedron(p - octahedron_for_sphere_centre, octahedron_for_sphere_dimension), 0.5);
-    if (res.x > dist) res = vec2(dist, SPHERE);
+    if (count_refract) dist = intersect(distance_from_sphere(p, diamond_centre, diamond_radius),
+                                 distance_from_octahedron(p - octahedron_for_diamond_centre, octahedron_for_diamond_dimension));
+    if (res.x > dist) res = vec2(dist, DIAMOND);
 
     return res;
 }
@@ -131,16 +128,16 @@ vec3 calculate_normal(vec3 p) {
     return normalize(normal);
 }
 
-Material sphere_material() {
-    Material sphere_mat;
-    sphere_mat.color        = vec3(0.9, 0.8, 0.8);
-    sphere_mat.shininess    = 100.0;
-    sphere_mat.k_diffuse    = 0.5;
-    sphere_mat.k_specular   = 0.9;
-    sphere_mat.k_ambient    = 0.5;
-    sphere_mat.k_occlusion  = 5.0;
-    sphere_mat.k_refraction = 1.2;
-    return sphere_mat;
+Material diamond_material() {
+    Material diamond_mat;
+    diamond_mat.color        = vec3(0.8, 0.8, 0.95);
+    diamond_mat.shininess    = 100.0;
+    diamond_mat.k_diffuse    = 0.5;
+    diamond_mat.k_specular   = 0.9;
+    diamond_mat.k_ambient    = 0.5;
+    diamond_mat.k_occlusion  = 5.0;
+    diamond_mat.k_refraction = 1.25;
+    return diamond_mat;
 }
 
 Material ellipsoid_material() {
@@ -191,8 +188,8 @@ Material cube_material() {
 
 vec3 color_of_closest_object(vec2 obj) {
     vec3 color = vec3(0.0);
-    if (obj.y == SPHERE) {
-        material = sphere_material();
+    if (obj.y == DIAMOND) {
+        material = diamond_material();
     }
     if (obj.y == ELLIPSOID) {
         material = ellipsoid_material();
@@ -295,9 +292,6 @@ vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
 
     vec3 internal_color = vec3(0.0);
     if (material.k_refraction > 0.0) {
-        //refracted = 1.0 - refraction(-viewer_dir, normal, material.k_refraction, REFRACTION_OUTSIDE);
-        //vec3 refract_dir = refract(ray_dir, normal, material.k_refraction / REFRACTION_OUTSIDE);
-        //internal_color = internal_ray_color(ray_pos + refract_dir*0.001, refract_dir) * refracted;
         final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
                              *(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
         final_color = glass_refraction(pos, ray_dir, normal, material.k_refraction, final_color);
@@ -310,7 +304,7 @@ vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
 }
 /*
 TODO:
-* do materials structures instead of assigning everything to different values
+* try to place the "diamond" somewhere else, maybe change the sizes. name it "diamond" or "crystall"
 */
 void main() {
     vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
