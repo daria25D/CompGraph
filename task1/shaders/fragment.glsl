@@ -26,26 +26,26 @@ struct Material {
 };
 //objects
 int   DIAMOND=1;
-vec3  diamond_centre     = vec3(2.0, -0.45, 0.0);
+vec3  diamond_centre     = vec3(0.0, 0.55, -3.0);
 float diamond_radius     = 0.7;
 
-vec3   octahedron_for_diamond_centre    = vec3(2.0, -1.25, 0.0);
+vec3   octahedron_for_diamond_centre    = vec3(0.0, -0.25, -3.0);
 float  octahedron_for_diamond_dimension = 0.87;
 
 int   ELLIPSOID=2;
-vec3  ellipsoid_centre     = vec3(2.0, -4.5, 1.5);
+vec3  ellipsoid_centre     = vec3(0.0, -3.5, -1.5);
 vec3  ellipsoid_dimensions = vec3(0.5, 0.3, 0.3);
 
 int   TORUS=3;
-vec3  torus_centre     = vec3(2.0, -2.5, 0.0);
+vec3  torus_centre     = vec3(0.0, -1.5, -3.0);
 vec2  torus_dimensions = vec2(1.2, 0.15);
 
 int   PLANE=4;
 vec3  plane_centre     = vec3(-1.0, -1.0, -1.0);
-vec4  plane_normal     = vec4(0.0, 1.0, 0.0, 5.0);
+vec4  plane_normal     = vec4(0.0, 1.0, 0.0, 4.0);
 
 int   CUBE=5;
-vec3  cube_centre     = vec3(2.0, -4.5, 0.0);
+vec3  cube_centre     = vec3(0.0, -3.5, -3.0);
 vec3  cube_dimensions = vec3(1.7, 1.5, 1.5);
 
 Material material;

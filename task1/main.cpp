@@ -74,11 +74,11 @@ void move_camera() {
     // Camera controls
     //float3 camera_movement(0.0, 0.0, 0.0);
 
-    GLfloat camera_speed = 0.25f;
+    GLfloat camera_speed = 0.3f;
     if (keys[GLFW_KEY_LEFT_SHIFT])
         camera_speed *= 2;
     if (!keys[GLFW_KEY_LEFT_SHIFT])
-        camera_speed = 0.25f;
+        camera_speed = 0.3f;
     if (keys[GLFW_KEY_W]) {
         camera_movement.x = (camera_speed * sin(to_rads(cam_rot[0]))) * cos(to_rads(cam_rot[1]));
         camera_movement.z = (camera_speed * cos(to_rads(cam_rot[0])) * -1.0f ) * cos(to_rads(cam_rot[1]));
@@ -102,17 +102,14 @@ void move_camera() {
         camera_position.y -= camera_speed;
     }
     if (keys[GLFW_KEY_R]) {
-        cam_rot[1] -= 0.4 * camera_speed;
+        cam_rot[1] -= 0.3 * camera_speed;
     }
     if (keys[GLFW_KEY_F]) {
-        cam_rot[1] += 0.4 * camera_speed;
+        cam_rot[1] += 0.3 * camera_speed;
     }
     if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D] && !keys[GLFW_KEY_Q] && !keys[GLFW_KEY_E]) {
         camera_movement = float3(0.0, 0.0, 0.0);
     }
-
-    //camera_position += camera_movement;
-
 }
 
 int initGL() {
@@ -142,7 +139,7 @@ int main(int argc, char **argv) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    //antialiasing?
+    //antialiasing
     glfwWindowHint(GLFW_SAMPLES, 8);
 
 
@@ -178,7 +175,7 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
 
     glfwSwapInterval(1); // force 60 frames per second
-    //antialiasing?
+    //antialiasing
     glEnable(GL_MULTISAMPLE);
     //Создаем и загружаем геометрию поверхности
     //
