@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <random>
 
-static GLsizei WIDTH = 512, HEIGHT = 512; //размеры окна
+static GLsizei WIDTH = 1024, HEIGHT = 1024; //размеры окна
 
 using namespace LiteMath;
 
@@ -95,16 +95,16 @@ void move_camera() {
         camera_movement.x = camera_speed * cos(to_rads(cam_rot[1]));
         camera_movement.z = camera_speed * sin(to_rads(cam_rot[1]));
     }
-    if (keys[GLFW_KEY_Q]) {
+    if (keys[GLFW_KEY_R]) {
         camera_position.y += camera_speed;
     }
-    if (keys[GLFW_KEY_E]) {
+    if (keys[GLFW_KEY_F]) {
         camera_position.y -= camera_speed;
     }
-    if (keys[GLFW_KEY_R]) {
+    if (keys[GLFW_KEY_Q]) {
         cam_rot[1] -= 0.3 * camera_speed;
     }
-    if (keys[GLFW_KEY_F]) {
+    if (keys[GLFW_KEY_E]) {
         cam_rot[1] += 0.3 * camera_speed;
     }
     if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D] && !keys[GLFW_KEY_Q] && !keys[GLFW_KEY_E]) {
