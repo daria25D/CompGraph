@@ -34,7 +34,7 @@ stdint.h
 inttypes.h
 -
 
-/home/daria/Documents/III_course/machgraf/task1/LiteMath.h
+/home/daria/Documents/III_course/CompGraph/task1/LiteMath.h
 math.h
 -
 stdlib.h
@@ -44,15 +44,19 @@ memory
 vector
 -
 
-/home/daria/Documents/III_course/machgraf/task1/ShaderProgram.h
+/home/daria/Documents/III_course/CompGraph/task1/ShaderProgram.cpp
+ShaderProgram.h
+/home/daria/Documents/III_course/CompGraph/task1/ShaderProgram.h
+
+/home/daria/Documents/III_course/CompGraph/task1/ShaderProgram.h
 unordered_map
 -
 common.h
-/home/daria/Documents/III_course/machgraf/task1/common.h
+/home/daria/Documents/III_course/CompGraph/task1/common.h
 LiteMath.h
-/home/daria/Documents/III_course/machgraf/task1/LiteMath.h
+/home/daria/Documents/III_course/CompGraph/task1/LiteMath.h
 
-/home/daria/Documents/III_course/machgraf/task1/common.h
+/home/daria/Documents/III_course/CompGraph/task1/common.h
 iostream
 -
 fstream
@@ -62,13 +66,13 @@ string
 glad/glad.h
 -
 
-/home/daria/Documents/III_course/machgraf/task1/main.cpp
+/home/daria/Documents/III_course/CompGraph/task1/main.cpp
 common.h
-/home/daria/Documents/III_course/machgraf/task1/common.h
+/home/daria/Documents/III_course/CompGraph/task1/common.h
 ShaderProgram.h
-/home/daria/Documents/III_course/machgraf/task1/ShaderProgram.h
+/home/daria/Documents/III_course/CompGraph/task1/ShaderProgram.h
 LiteMath.h
-/home/daria/Documents/III_course/machgraf/task1/LiteMath.h
+/home/daria/Documents/III_course/CompGraph/task1/LiteMath.h
 GLFW/glfw3.h
 -
 random

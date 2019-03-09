@@ -5,7 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/daria/Documents/III_course/machgraf/task1/glad.c" "/home/daria/Documents/III_course/machgraf/task1/build/CMakeFiles/main.dir/glad.c.o"
+  "/home/daria/Documents/III_course/CompGraph/task1/glad.c" "/home/daria/Documents/III_course/CompGraph/task1/build/CMakeFiles/main.dir/glad.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
@@ -19,8 +19,8 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "../dependencies/include/GLAD"
   )
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/daria/Documents/III_course/machgraf/task1/ShaderProgram.cpp" "/home/daria/Documents/III_course/machgraf/task1/build/CMakeFiles/main.dir/ShaderProgram.cpp.o"
-  "/home/daria/Documents/III_course/machgraf/task1/main.cpp" "/home/daria/Documents/III_course/machgraf/task1/build/CMakeFiles/main.dir/main.cpp.o"
+  "/home/daria/Documents/III_course/CompGraph/task1/ShaderProgram.cpp" "/home/daria/Documents/III_course/CompGraph/task1/build/CMakeFiles/main.dir/ShaderProgram.cpp.o"
+  "/home/daria/Documents/III_course/CompGraph/task1/main.cpp" "/home/daria/Documents/III_course/CompGraph/task1/build/CMakeFiles/main.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

@@ -1,120 +1,333 @@
 #version 330
-
-#define float2 vec2
-#define float3 vec3
-#define float4 vec4
-#define float4x4 mat4
-#define float3x3 mat3
-
-in float2 fragmentTexCoord;
-
-layout(location = 0) out vec4 fragColor;
-
+uniform mat4 g_rayMatrix;
+//uniform vec3 cam_pos;
 uniform int g_screenWidth;
 uniform int g_screenHeight;
 
-uniform float3 g_bBoxMin   = float3(-1,-1,-1);
-uniform float3 g_bBoxMax   = float3(+1,+1,+1);
+in vec2 fragmentTexCoord;
 
-uniform float4x4 g_rayMatrix;
+out vec4 color;
 
-uniform float4   g_bgColor = float4(1,1,1,1);
+const int NUM_OF_LIGHTS = 2;
+const float MAX_DIST = 50;
+const float REFRACTION_OUTSIDE = 1.0002;
+const float REFLECTIVITY = 0.01;
 
-float3 EyeRayDir(float x, float y, float w, float h)
-{
-	float fov = 3.141592654f/(2.0f); 
-  float3 ray_dir;
-  
-	ray_dir.x = x+0.5f - (w/2.0f);
-	ray_dir.y = y+0.5f - (h/2.0f);
-	ray_dir.z = -(w)/tan(fov/2.0f);
-	
-  return normalize(ray_dir);
+bool count_refract = true;
+
+struct Material {
+    vec3  color;
+    float shininess;
+    float k_diffuse;
+    float k_specular;
+    float k_ambient;
+    float k_occlusion;
+    float k_refraction;
+};
+//objects
+int   DIAMOND=1;
+vec3  diamond_centre     = vec3(0.0, 0.55, -3.0);
+float diamond_radius     = 0.7;
+
+vec3   octahedron_for_diamond_centre    = vec3(0.0, -0.25, -3.0);
+float  octahedron_for_diamond_dimension = 0.87;
+
+int   ELLIPSOID=2;
+vec3  ellipsoid_centre     = vec3(0.0, -2.75, -1.5);
+vec3  ellipsoid_dimensions = vec3(0.5, 0.3, 0.3);
+
+int   TORUS=3;
+vec3  torus_centre     = vec3(0.0, -1.5, -3.0);
+vec2  torus_dimensions = vec2(1.2, 0.15);
+
+int   PLANE=4;
+vec3  plane_centre     = vec3(-1.0, -1.0, -1.0);
+vec4  plane_normal     = vec4(0.0, 1.0, 0.0, 4.0);
+
+int   CUBE=5;
+vec3  cube_centre     = vec3(0.0, -3.5, -3.0);
+vec3  cube_dimensions = vec3(1.7, 1.5, 1.5);
+
+Material material;
+
+//distance functions
+float distance_from_sphere(vec3 p, vec3 c, float r) {
+    return length(p - c) - r;
+}
+float distance_from_ellipsoid(vec3 p, vec3 c, vec3 r) {
+    return (length((p - c)/r) - 1.0) * min(min(r.x,r.y),r.z);
+}
+float distance_from_torus(vec3 p, vec2 t) {
+    vec2 q = vec2(length(p.xz) - t.x, p.y);
+    return length(q) - t.y;
+}
+float distance_from_plane(vec3 p, vec3 c, vec4 n) {
+  // n must be normalized
+  return dot(p - c, n.xyz) + n.w;
+}
+float distance_from_cube(vec3 p, vec3 c, vec3 s) {
+    vec3 d = abs(p - c) - s;
+
+    float insideDistance = min(max(d.x, max(d.y, d.z)), 0.0);
+    float outsideDistance = length(max(d, 0.0));
+
+    return insideDistance + outsideDistance;
+}
+float distance_from_octahedron(vec3 p, float s) {
+    p = abs(p);
+    float m = p.x+p.y+p.z-s;
+    vec3 q;
+         if(3.0*p.x < m) q = p.xyz;
+    else if(3.0*p.y < m) q = p.yzx;
+    else if(3.0*p.z < m) q = p.zxy;
+    else return m * 0.57735027;
+
+    float k = clamp(0.5*(q.z - q.y + s), 0.0, s);
+    return length(vec3(q.x, q.y - s + k, q.z - k));
+}
+//changing the final shape
+float intersect(float dist_a, float dist_b) {
+    return max(dist_a, dist_b);
 }
 
-bool RayBoxIntersection(float3 ray_pos, float3 ray_dir, float3 boxMin, float3 boxMax, inout float tmin, inout float tmax)
-{
-  ray_dir.x = 1.0f/ray_dir.x;
-  ray_dir.y = 1.0f/ray_dir.y;
-  ray_dir.z = 1.0f/ray_dir.z; 
-
-  float lo = ray_dir.x*(boxMin.x - ray_pos.x);
-  float hi = ray_dir.x*(boxMax.x - ray_pos.x);
-  
-  tmin = min(lo, hi);
-  tmax = max(lo, hi);
-
-  float lo1 = ray_dir.y*(boxMin.y - ray_pos.y);
-  float hi1 = ray_dir.y*(boxMax.y - ray_pos.y);
-
-  tmin = max(tmin, min(lo1, hi1));
-  tmax = min(tmax, max(lo1, hi1));
-
-  float lo2 = ray_dir.z*(boxMin.z - ray_pos.z);
-  float hi2 = ray_dir.z*(boxMax.z - ray_pos.z);
-
-  tmin = max(tmin, min(lo2, hi2));
-  tmax = min(tmax, max(lo2, hi2));
-  
-  return (tmin <= tmax) && (tmax > 0.f);
+float twist_torus(vec3 p, vec3 c, vec2 t, float twists) {
+    float k = cos(twists*(p.y - c.y));
+    float s = sin(twists*(p.y - c.y));
+    mat2  m = mat2(k, -s, s, k);
+    vec3  q = vec3(m*(p.xz - c.xz), p.y - c.y);
+    return distance_from_torus(q, t);
 }
 
+//minimal distance to any surface
+vec2 min_distance(vec3 p) {
+    vec2 res = vec2(MAX_DIST*20, 0);
 
-float3 RayMarchConstantFog(float tmin, float tmax, inout float alpha)
-{
-  float dt = 0.05f;
-	float t  = tmin;
-	
-	alpha  = 1.0f;
-	float3 color = float3(0,0,0);
-	
-	while(t < tmax && alpha > 0.01f)
-	{
-	  float a = 0.05f;
-	  color += a*alpha*float3(1.0f,1.0f,0.0f);
-	  alpha *= (1.0f-a);
-	  t += dt;
-	}
-	
-	return color;
+    float dist = distance_from_ellipsoid(p,  ellipsoid_centre, ellipsoid_dimensions);
+    if (res.x > dist) res = vec2(dist, ELLIPSOID);
+    dist = twist_torus(p, torus_centre, torus_dimensions, 0);
+    if (res.x > dist) res = vec2(dist, TORUS);
+    dist = distance_from_plane(p, plane_centre, normalize(plane_normal));
+    if (res.x > dist) res = vec2(dist, PLANE);
+    dist = distance_from_cube(p, cube_centre, cube_dimensions);
+    if (res.x > dist) res = vec2(dist, CUBE);
+    if (count_refract) dist = intersect(distance_from_sphere(p, diamond_centre, diamond_radius),
+                                 distance_from_octahedron(p - octahedron_for_diamond_centre, octahedron_for_diamond_dimension));
+    if (res.x > dist) res = vec2(dist, DIAMOND);
+
+    return res;
+}
+//normal for a given point
+vec3 calculate_normal(vec3 p) {
+    vec3 small_step = vec3(0.001, 0.0, 0.0);
+    vec3 normal = vec3(0.0);
+    //gradients calculation
+    normal.x = min_distance(p + small_step.xyy).x - min_distance(p - small_step.xyy).x;
+    normal.y = min_distance(p + small_step.yxy).x - min_distance(p - small_step.yxy).x;
+    normal.z = min_distance(p + small_step.yyx).x - min_distance(p - small_step.yyx).x;
+
+    return normalize(normal);
 }
 
+Material diamond_material() {
+    Material diamond_mat;
+    diamond_mat.color        = vec3(0.8, 0.8, 0.95);
+    diamond_mat.shininess    = 100.0;
+    diamond_mat.k_diffuse    = 0.5;
+    diamond_mat.k_specular   = 0.9;
+    diamond_mat.k_ambient    = 0.5;
+    diamond_mat.k_occlusion  = 5.0;
+    diamond_mat.k_refraction = 1.25;
+    return diamond_mat;
+}
 
-void main(void)
-{	
+Material ellipsoid_material() {
+    Material ellipsoid_mat;
+    ellipsoid_mat.color        = vec3(0.9, 0.7, 0.8);
+    ellipsoid_mat.shininess    = 100.0;
+    ellipsoid_mat.k_diffuse    = 0.8;
+    ellipsoid_mat.k_specular   = 0.8;
+    ellipsoid_mat.k_ambient    = 0.6;
+    ellipsoid_mat.k_occlusion  = 4.0;
+    ellipsoid_mat.k_refraction = 0.0;
+    return ellipsoid_mat;
+}
 
-  float w = float(g_screenWidth);
-  float h = float(g_screenHeight);
-  
-  // get curr pixelcoordinates
-  //
-  float x = fragmentTexCoord.x*w; 
-  float y = fragmentTexCoord.y*h;
-  
-  // generate initial ray
-  //
-  float3 ray_pos = float3(0,0,0); 
-  float3 ray_dir = EyeRayDir(x,y,w,h);
- 
-  // transorm ray with matrix
-  //
-  ray_pos = (g_rayMatrix*float4(ray_pos,1)).xyz;
-  ray_dir = float3x3(g_rayMatrix)*ray_dir;
- 
-  // intersect bounding box of the whole scene, if no intersection found return background color
-  // 
-  float tmin = 1e38f;
-  float tmax = 0;
- 
-  if(!RayBoxIntersection(ray_pos, ray_dir, g_bBoxMin, g_bBoxMax, tmin, tmax))
-  {
-    fragColor = g_bgColor;
-    return;
-  }
-	
-	float alpha = 1.0f;
-	float3 color = RayMarchConstantFog(tmin, tmax, alpha);
-	fragColor = float4(color,0)*(1.0f-alpha) + g_bgColor*alpha;
+Material torus_material() {
+    Material torus_mat;
+    torus_mat.color        = vec3(0.9, 0.7, 0.0);
+    torus_mat.shininess    = 70.0;
+    torus_mat.k_diffuse    = 0.6;
+    torus_mat.k_specular   = 0.7;
+    torus_mat.k_ambient    = 0.5;
+    torus_mat.k_occlusion  = 4.0;
+    torus_mat.k_refraction = 0.0;
+    return torus_mat;
+}
+Material plane_material() {
+    Material plane_mat;
+    plane_mat.color        = vec3(0.8);
+    plane_mat.shininess    = 5.0;
+    plane_mat.k_diffuse    = 0.33;
+    plane_mat.k_specular   = 0.5;
+    plane_mat.k_ambient    = 0.33;
+    plane_mat.k_occlusion  = 5.0;
+    plane_mat.k_refraction = 0.0;
+    return plane_mat;
+}
+Material cube_material() {
+    Material cube_mat;
+    cube_mat.color        = vec3(0.5, 0.0, 0.5);
+    cube_mat.shininess    = 10.0;
+    cube_mat.k_diffuse    = 0.33;
+    cube_mat.k_specular   = 0.5;
+    cube_mat.k_ambient    = 0.33;
+    cube_mat.k_occlusion  = 4.0;
+    cube_mat.k_refraction = 0.0;
+    return cube_mat;
+}
+
+vec3 color_of_closest_object(vec2 obj) {
+    vec3 color = vec3(0.0);
+    if (obj.y == DIAMOND) {
+        material = diamond_material();
+    }
+    if (obj.y == ELLIPSOID) {
+        material = ellipsoid_material();
+    }
+    if (obj.y == TORUS) {
+        material = torus_material();
+    }
+    if (obj.y == PLANE) {
+        material = plane_material();
+    } if (obj.y == CUBE) {
+        material = cube_material();
+    }
+    return material.color;
+}
+
+vec2 intersection_point(vec3 ray_pos, vec3 ray_dir) {
+    float t = 0.0;
+    vec3 obj = vec3(0.0);
+    for (int i = 0; i < 128; i++) {
+        obj = vec3(min_distance(ray_pos + t*ray_dir), t);
+        if (abs(obj.x) < 0.01) return obj.zy;//min_dist
+        t += obj.x;
+        if (abs(obj.x) > MAX_DIST) return obj.zy;//max_dist
+    }
+    return obj.zy;
+}
+
+float ambient_occlusion(vec3 p, vec3 n, float k){
+    float delta = 0.5;
+    float a = 0.0;
+    float weight = 0.75;
+    float m;
+    for(int i = 1; i <= 10; i++) {
+        float d = (float(i) / float(10)) * delta;
+        a += weight*(d - min_distance(p + n*d).x);
+        weight *= 0.5;
+    }
+    return clamp(1.0 - k*a, 0.0, 1.0);
+}
+
+float soft_shadow(vec3 ray_pos, vec3 ray_dir){
+    float res = 1.0, t = 0.01;
+    float ph = 1e20;
+    for(int i = 0; i < 32; i++) {
+        float h = min_distance(ray_pos + ray_dir*t).x;
+        if(h < 0.001) return 0.0;
+        float y = h*h / (2.0*ph);
+        float d = sqrt(h*h - y*y);
+        res = min(res, 12.0*d / max(0.0, t - y));
+        ph = h;
+        t += h;
+        if (res < 0.001 || t > 50.0) break;
+    }
+    return clamp(res, 0.0, 1.0);
+}
+
+vec3 glass_refraction(vec3 pos, vec3 ray_dir, vec3 normal, float k_refract, vec3 main_color) {
+    vec3 refl = reflect(ray_dir, normal);
+    vec2 refl_obj = intersection_point(pos, refl);
+
+    vec3 refl_pos = pos + refl_obj.x*refl;
+    vec3 refl_color = color_of_closest_object(refl_obj);
+    vec3 refl_normal = calculate_normal(refl_pos);
+    float refl_occ = ambient_occlusion(refl_pos, refl_normal, material.k_occlusion);
+    refl_color *= refl_occ;
+    count_refract = false;
+    vec3 refr = refract(ray_dir, normal, 1.0 / k_refract);
+    vec2 robj = intersection_point(pos, refr);
+    vec3 r_pos = pos + robj.x*refr;
+    vec3 r_normal = calculate_normal(r_pos);
+    count_refract = true;
+    vec3 color = color_of_closest_object(robj);
+    float occ = ambient_occlusion(r_pos, r_normal, material.k_occlusion);
+    color *= main_color * occ;
+    return color;
+}
+
+vec3 apply_fog(vec3 color, float distance, vec3 ray_dir, vec3 light_dir1, vec3 light_dir2) {
+    float fog_amount = 1.0 - exp(-distance * distance * 0.0005);
+    float sun_amount = max(max(dot(ray_dir, light_dir1), dot(ray_dir, light_dir2)), 0.0);
+    vec3 fog_color = mix(vec3(0.5, 0.6, 0.7), vec3(1.0, 0.9, 0.7), pow(sun_amount, 8.0));
+    return mix(color, fog_color, fog_amount);
+}
+
+vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
+    vec2 obj = intersection_point(ray_pos, ray_dir);
+    vec3 pos = ray_pos + obj.x*ray_dir;
+    vec3 normal = calculate_normal(pos);
+
+    vec3 color = color_of_closest_object(obj);
+    if (obj.x > MAX_DIST) color = vec3(0.8);
+    vec3 final_color = vec3(0.0);
+
+    vec3 light_dir1 = normalize(light_position[0] - pos);
+    vec3 light_dir2 = normalize(light_position[1] - pos);
+
+    vec3 viewer_dir = normalize(ray_pos - pos);
+
+    vec3 reflection1 = normalize(light_dir1 + viewer_dir);
+    vec3 reflection2 = normalize(light_dir2 + viewer_dir);
+
+    float diffuse1 = clamp(dot(normal, light_dir1), 0.0, 1.0);
+    float diffuse2 = clamp(dot(normal, light_dir2), 0.0, 1.0);
+
+    float specular1 = max(0.0, pow(dot(normal, reflection1), material.shininess)) * float(diffuse1 > 0.0);
+    float specular2 = max(0.0, pow(dot(normal, reflection2), material.shininess)) * float(diffuse2 > 0.0);
+
+    float ambient_occ = ambient_occlusion(pos, normal, material.k_occlusion);
+
+    float shadow1 = soft_shadow(pos, normalize(light_position[0]));
+    float shadow2 = soft_shadow(pos, normalize(light_position[1]));
+
+    vec3 internal_color = vec3(0.0);
+    if (material.k_refraction > 0.0) {
+        final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
+                              *(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
+        final_color = glass_refraction(pos, ray_dir, normal, material.k_refraction, final_color);
+    } else {
+        final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
+                              * 0.5*(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
+        final_color = apply_fog(final_color, obj.x, ray_dir, light_dir1, light_dir2);
+    }
+    return final_color;
+}
+
+void main() {
+    vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
+    vec3 ray_dir = normalize(vec3(tmp, -(g_screenWidth)/tan(3.14159265/3)));
+    mat3 rdMat = mat3(g_rayMatrix);//multiply rayMatrix 3x3 x rd
+    ray_dir = rdMat * ray_dir;
+    vec3 ray_pos = vec3(0.0 + g_rayMatrix[3][0], 0.0 + g_rayMatrix[3][1], 5.0 + g_rayMatrix[3][2]); //+ rayMatrix[3][i]
+
+    vec3 light_position[NUM_OF_LIGHTS];
+    light_position[0] = vec3(4.0, 7.0, 7.0);
+    light_position[1] = vec3(-2.0, 7.0, 3.0);
+
+
+    color = vec4(render(ray_pos, ray_dir, light_position), 1.0);
 }
 
 

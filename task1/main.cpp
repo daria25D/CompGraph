@@ -15,15 +15,13 @@ using namespace LiteMath;
 
 float3 camera_position(0, 0, 0);
 float cam_rot[2] = {0, 0};
-float mx = float(WIDTH), my = HEIGHT/2.0;
+float mx = float(WIDTH/2), my = HEIGHT/2.0;
 float3 camera_movement(0.0, 0.0, 0.0);
 bool keys[350];
 
 void windowResize(GLFWwindow *window, int width, int height) {
     WIDTH = width;
     HEIGHT = height;
-    //mx = width;
-    //my = height/2.0;
 }
 
 static void mouseMove(GLFWwindow *window, double xpos, double ypos) {
@@ -72,8 +70,6 @@ float to_rads(const float &angle) {
 
 void move_camera() {
     // Camera controls
-    //float3 camera_movement(0.0, 0.0, 0.0);
-
     GLfloat camera_speed = 0.3f;
     if (keys[GLFW_KEY_LEFT_SHIFT])
         camera_speed *= 2;
@@ -139,7 +135,7 @@ int main(int argc, char **argv) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    //antialiasing
+    //antialiasing?
     glfwWindowHint(GLFW_SAMPLES, 8);
 
 
@@ -175,12 +171,10 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
 
     glfwSwapInterval(1); // force 60 frames per second
-    //antialiasing
+    //antialiasing?
     glEnable(GL_MULTISAMPLE);
     //Создаем и загружаем геометрию поверхности
     //
-    int width, height;
-    //unsigned char * image = SOIL_load_image("../textures/container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
     GLuint g_vertexBufferObject;
     GLuint g_vertexArrayObject;
     {
@@ -228,16 +222,12 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
         program.StartUseShader();
         GL_CHECK_ERRORS;
-        //std::cout << camera_position.x << " " << camera_position.y << " " << camera_position.z << std::endl;
         float4x4 camRotMatrix = mul(rotate_Y_4x4(-cam_rot[1]), rotate_X_4x4(+cam_rot[0]));
         float4x4 camTransMatrix = translate4x4(camera_position);
         float4x4 rayMatrix = mul(camTransMatrix, camRotMatrix);
         float y = camera_position.y;
         camera_position += mul(camRotMatrix, camera_movement);
         camera_position.y = y;
-        //отслеживать нажата ли кнопка или отпущена, матрицу изменять в цикле
-        //матрицу  сдвига умножать на матрицу сдвига и на матрицу поворота текущую слева
-        //program.SetUniform("radius", 0.5f);
         program.SetUniform("g_rayMatrix", rayMatrix);
         GL_CHECK_ERRORS;
         program.SetUniform("g_screenWidth", WIDTH);
@@ -255,7 +245,6 @@ int main(int argc, char **argv) {
 
         // draw call
         //
-//        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(g_vertexArrayObject); GL_CHECK_ERRORS;
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);  GL_CHECK_ERRORS;
         GL_CHECK_ERRORS;  // The last parameter of glDrawArrays is equal to VS invocations
@@ -268,9 +257,6 @@ int main(int argc, char **argv) {
     //
     glDeleteVertexArrays(1, &g_vertexArrayObject);
     glDeleteBuffers(1, &g_vertexBufferObject);
-
-//    SOIL_free_image_data(image);
-//    glBindTexture(GL_TEXTURE_2D, 0);
 
     glfwTerminate();
     return 0;

@@ -33,7 +33,7 @@ vec3   octahedron_for_diamond_centre    = vec3(0.0, -0.25, -3.0);
 float  octahedron_for_diamond_dimension = 0.87;
 
 int   ELLIPSOID=2;
-vec3  ellipsoid_centre     = vec3(0.0, -3.5, -1.5);
+vec3  ellipsoid_centre     = vec3(0.0, -2.75, -1.5);
 vec3  ellipsoid_dimensions = vec3(0.5, 0.3, 0.3);
 
 int   TORUS=3;
@@ -231,12 +231,17 @@ float ambient_occlusion(vec3 p, vec3 n, float k){
 }
 
 float soft_shadow(vec3 ray_pos, vec3 ray_dir){
-    float res = 1.0, t = 0.15;
-    for(int i = 0; i < 16; i++) {
+    float res = 1.0, t = 0.01;
+    float ph = 1e20;
+    for(int i = 0; i < 32; i++) {
         float h = min_distance(ray_pos + ray_dir*t).x;
-        if(h < 0.01) return 0.0;
-        res = min(res, 8.0 * h/t);
-        t += h*0.9;
+        if(h < 0.001) return 0.0;
+        float y = h*h / (2.0*ph);
+        float d = sqrt(h*h - y*y);
+        res = min(res, 12.0*d / max(0.0, t - y));
+        ph = h;
+        t += h;
+        if (res < 0.001 || t > 50.0) break;
     }
     return clamp(res, 0.0, 1.0);
 }
@@ -260,6 +265,13 @@ vec3 glass_refraction(vec3 pos, vec3 ray_dir, vec3 normal, float k_refract, vec3
     float occ = ambient_occlusion(r_pos, r_normal, material.k_occlusion);
     color *= main_color * occ;
     return color;
+}
+
+vec3 apply_fog(vec3 color, float distance, vec3 ray_dir, vec3 light_dir1, vec3 light_dir2) {
+    float fog_amount = 1.0 - exp(-distance * distance * 0.0005);
+    float sun_amount = max(max(dot(ray_dir, light_dir1), dot(ray_dir, light_dir2)), 0.0);
+    vec3 fog_color = mix(vec3(0.5, 0.6, 0.7), vec3(1.0, 0.9, 0.7), pow(sun_amount, 8.0));
+    return mix(color, fog_color, fog_amount);
 }
 
 vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
@@ -293,19 +305,16 @@ vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
     vec3 internal_color = vec3(0.0);
     if (material.k_refraction > 0.0) {
         final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
-                             *(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
+                              *(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
         final_color = glass_refraction(pos, ray_dir, normal, material.k_refraction, final_color);
     } else {
         final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
                               * 0.5*(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
-        final_color *= exp(-0.00005*obj.x*obj.x);
+        final_color = apply_fog(final_color, obj.x, ray_dir, light_dir1, light_dir2);
     }
     return final_color;
 }
-/*
-TODO:
-* try to place the "diamond" somewhere else, maybe change the sizes. name it "diamond" or "crystall"
-*/
+
 void main() {
     vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
     vec3 ray_dir = normalize(vec3(tmp, -(g_screenWidth)/tan(3.14159265/3)));
@@ -315,7 +324,7 @@ void main() {
 
     vec3 light_position[NUM_OF_LIGHTS];
     light_position[0] = vec3(4.0, 7.0, 7.0);
-    light_position[1] = vec3(2.0, 7.0, -3.0);
+    light_position[1] = vec3(-2.0, 7.0, 3.0);
 
 
     color = vec4(render(ray_pos, ray_dir, light_position), 1.0);
