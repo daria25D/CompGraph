@@ -1,21 +1,30 @@
 //internal includes
 #include "common.h"
 #include "ShaderProgram.h"
-#include "LiteMath.h"
 
 //External dependencies
 #define GLFW_DLL
 
 #include <GLFW/glfw3.h>
 #include <random>
-#include <cstring>
+#include <string.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 
-using namespace LiteMath;
+#include <SOIL/SOIL.h>
+
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
+
+
+#include "Mesh.h"
+#include "Model.h"
+
+using namespace std;
 
 static const GLsizei WIDTH = 640, HEIGHT = 480; //размеры окна
 
@@ -23,28 +32,28 @@ int initGL() {
     int res = 0;
     //грузим функции opengl через glad
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        std::cout << "Failed to initialize OpenGL context" << std::endl;
+        cout << "Failed to initialize OpenGL context" << endl;
         return -1;
     }
 
-    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    cout << "Vendor: " << glGetString(GL_VENDOR) << endl;
+    cout << "Renderer: " << glGetString(GL_RENDERER) << endl;
+    cout << "Version: " << glGetString(GL_VERSION) << endl;
+    cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 
     return 0;
 }
 
 bool loadOBJ(
        const char * path,
-        std::vector < float3 > & out_vertices,
-        std::vector < float2 > & out_uvs,
-        std::vector < float3 > & out_normals
+        vector < glm::vec3 > & out_vertices,
+        vector < glm::vec2 > & out_uvs,
+        vector < glm::vec3 > & out_normals
 ) {
-    std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
-    std::vector< float3 > temp_vertices;
-    std::vector< float2 > temp_uvs;
-    std::vector< float3 > temp_normals;
+    vector< unsigned int > vertexIndices, uvIndices, normalIndices;
+    vector< glm::vec3 > temp_vertices;
+    vector< glm::vec2 > temp_uvs;
+    vector< glm::vec3 > temp_normals;
 
     FILE * file = fopen(path, "r");
     if( file == NULL ){
@@ -59,19 +68,19 @@ bool loadOBJ(
         if (res == EOF)
             break;
         if (strcmp(lineHeader, "v") == 0) {
-            float3 vertex;
+            glm::vec3 vertex;
             fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
             temp_vertices.push_back(vertex);
         } else if (strcmp(lineHeader, "vt") == 0) {
-            float2 uv;
+            glm::vec2 uv;
             fscanf(file, "%f %f\n", &uv.x, &uv.y);
             temp_uvs.push_back(uv);
         } else if (strcmp(lineHeader, "vn") == 0) {
-            float3 normal;
+            glm::vec3 normal;
             fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
             temp_normals.push_back(normal);
         } else if (strcmp(lineHeader, "f") == 0) {
-            std::string vertex1, vertex2, vertex3;
+            string vertex1, vertex2, vertex3;
             unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
             int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0],
                                  &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2],
@@ -93,73 +102,20 @@ bool loadOBJ(
     }
     for (int i = 0; i < vertexIndices.size(); i++) {
         unsigned int vertex_index = vertexIndices[i];
-        float3 vertex = temp_vertices[vertex_index - 1];
+        glm::vec3 vertex = temp_vertices[vertex_index - 1];
         out_vertices.push_back(vertex);
     }
     for (int i = 0; i < uvIndices.size(); i++) {
         unsigned int uv_index = uvIndices[i];
-        float2 uv = temp_uvs[uv_index - 1];
+        glm::vec2 uv = temp_uvs[uv_index - 1];
         out_uvs.push_back(uv);
     }
     for (int i = 0; i < normalIndices.size(); i++) {
         unsigned int normal_index = normalIndices[i];
-        float3 normal = temp_normals[normal_index - 1];
+        glm::vec3 normal = temp_normals[normal_index - 1];
         out_vertices.push_back(normal);
     }
     return true;
-}
-
-GLuint loadBMP_custom(const char * imagepath) {
-    // Данные, прочитанные из заголовка BMP-файла
-    unsigned char header[54]; // Каждый BMP-файл начинается с заголовка, длиной в 54 байта
-    unsigned int dataPos;     // Смещение данных в файле (позиция данных)
-    unsigned int width, height;
-    unsigned int imageSize;   // Размер изображения = Ширина * Высота * 3
-// RGB-данные, полученные из файла
-    unsigned char * data;
-    FILE * file = fopen(imagepath,"rb");
-    if (!file) {
-        printf("Изображение не может быть открыто\n");
-        return 0;
-    }
-    if ( fread(header, 1, 54, file) != 54 ) { // Если мы прочитали меньше 54 байт, значит возникла проблема
-        printf("Некорректный BMP-файл\n");
-        return false;
-    }
-    if ( header[0]!='B' || header[1]!='M' ){
-        printf("Некорректный BMP-файл\n");
-        return 0;
-    }
-    // Читаем необходимые данные
-    dataPos    = *(int*)&(header[0x0A]); // Смещение данных изображения в файле
-    imageSize  = *(int*)&(header[0x22]); // Размер изображения в байтах
-    width      = *(int*)&(header[0x12]); // Ширина
-    height     = *(int*)&(header[0x16]); // Высота
-    // Некоторые BMP-файлы имеют нулевые поля imageSize и dataPos, поэтому исправим их
-    if (imageSize == 0)    imageSize = width*height * 3; // Ширину * Высоту * 3, где 3 - 3 компоненты цвета (RGB)
-    if (dataPos == 0)      dataPos = 54; // В таком случае, данные будут следовать сразу за заголовком
-// Создаем буфер
-    data = new unsigned char [imageSize];
-
-// Считываем данные из файла в буфер
-    fread(data, 1, imageSize, file);
-
-// Закрываем файл, так как больше он нам не нужен
-    fclose(file);
-
-// Создадим одну текстуру OpenGL
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-// Сделаем созданную текстуру текущий, таким образом все следующие функции будут работать именно с этой текстурой
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-// Передадим изображение OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    return textureID;
 }
 
 int main(int argc, char **argv) {
@@ -174,7 +130,7 @@ int main(int argc, char **argv) {
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL basic sample", nullptr, nullptr);
     if (window == nullptr) {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        cout << "Failed to create GLFW window" << endl;
         glfwTerminate();
         return -1;
     }
@@ -192,7 +148,7 @@ int main(int argc, char **argv) {
 
     //создание шейдерной программы из двух файлов с исходниками шейдеров
     //используется класс-обертка ShaderProgram
-    std::unordered_map<GLenum, std::string> shaders;
+    unordered_map<GLenum, string> shaders;
     shaders[GL_VERTEX_SHADER] = "vertex.glsl";
     shaders[GL_FRAGMENT_SHADER] = "fragment.glsl";
     ShaderProgram program(shaders);
@@ -207,61 +163,77 @@ int main(int argc, char **argv) {
     glm::mat4 view(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CW);
+
+    Model model1("../objects/cup.obj");
     //Создаем и загружаем геометрию поверхности
     //
 
-    std::vector< float3 > vertices;
-    std::vector< float2 > uvs;
-    std::vector< float3 > normals; // Won't be used at the moment.
-    bool res = loadOBJ("../cube.obj", vertices, uvs, normals);
-
-    GLuint g_vertexBufferObject;
-    GLuint g_vertexArrayObject = 0; //only one needed
-    GLuint g_uvBuffer; //add for normals
-    {
-        g_vertexBufferObject = 0;
-        g_uvBuffer = 0;
-        GLuint vertexLocation = 0; // simple layout, assume have only positions at location = 0
-        GLuint uvLocation = 1; //add for normals layout = 2
-        //TODO: add uv buffer
-        glGenBuffers(1, &g_vertexBufferObject);
-        GL_CHECK_ERRORS;
-        glBindBuffer(GL_ARRAY_BUFFER, g_vertexBufferObject);
-        GL_CHECK_ERRORS;
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float3), &vertices[0], GL_STATIC_DRAW);
-
-        glGenBuffers(1, &g_uvBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, g_uvBuffer);
-        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float2), &uvs[0], GL_STATIC_DRAW);
-        GL_CHECK_ERRORS;
-
-        //add 3 lines for normals
-
-        glGenVertexArrays(1, &g_vertexArrayObject);
-        GL_CHECK_ERRORS;
-        glBindVertexArray(g_vertexArrayObject);
-        GL_CHECK_ERRORS;
-
-        glBindBuffer(GL_ARRAY_BUFFER, g_vertexBufferObject);
-        GL_CHECK_ERRORS;
-        glEnableVertexAttribArray(vertexLocation);
-        GL_CHECK_ERRORS;
-        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, g_uvBuffer);
-        glEnableVertexAttribArray(uvLocation);
-        glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-        //add 3 lines for normals
-
-        GLuint texture = loadBMP_custom("../textures/paper.bmp");
-
-        GL_CHECK_ERRORS;
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glBindVertexArray(0);
-        //glBindVertexArray(1);
-    }
+//    vector< glm::vec3 > vertices;
+//    vector< glm::vec2 > uvs;
+//    vector< glm::vec3 > normals; // Won't be used at the moment.
+//    bool res = loadOBJ("../objects/sphere.obj", vertices, uvs, normals);
+//
+//    GLuint g_vertexArrayObject = 0; //only one needed
+//    GLuint g_vertexBufferObject;
+//    GLuint g_uvBuffer; //add for normals
+//    unsigned char * image;
+//    GLuint texture;
+//    {
+//        g_vertexBufferObject = 0;
+//        g_uvBuffer = 0;
+//        GLuint vertexLocation = 0; // simple layout, assume have only positions at location = 0
+//        GLuint uvLocation = 1; //add for normals layout = 2
+//        //TODO: add uv buffer
+//        glGenBuffers(1, &g_vertexBufferObject);
+//        GL_CHECK_ERRORS;
+//        glBindBuffer(GL_ARRAY_BUFFER, g_vertexBufferObject);
+//        GL_CHECK_ERRORS;
+//        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+//
+//        glGenBuffers(1, &g_uvBuffer);
+//        glBindBuffer(GL_ARRAY_BUFFER, g_uvBuffer);
+//        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+//        GL_CHECK_ERRORS;
+//
+//        //add 3 lines for normals
+//
+//        glGenVertexArrays(1, &g_vertexArrayObject);
+//        GL_CHECK_ERRORS;
+//        glBindVertexArray(g_vertexArrayObject);
+//        GL_CHECK_ERRORS;
+//
+//        glBindBuffer(GL_ARRAY_BUFFER, g_vertexBufferObject);
+//        GL_CHECK_ERRORS;
+//        glEnableVertexAttribArray(vertexLocation);
+//        GL_CHECK_ERRORS;
+//        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//        glBindBuffer(GL_ARRAY_BUFFER, g_uvBuffer);
+//        glEnableVertexAttribArray(uvLocation);
+//        glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//        //add 3 lines for normals
+//
+//        //texture binding
+//        int width, height;
+//        image = SOIL_load_image("../textures/marble.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+//        glGenTextures(1, &texture);
+//        glBindTexture(GL_TEXTURE_2D, texture);
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//        glGenerateMipmap(GL_TEXTURE_2D);
+//
+//        GL_CHECK_ERRORS;
+//        glBindVertexArray(0);
+//        //glBindVertexArray(1);
+//    }
 
     //цикл обработки сообщений и отрисовки сцены каждый кадр
     while (!glfwWindowShouldClose(window)) {
@@ -270,6 +242,7 @@ int main(int argc, char **argv) {
         //очищаем экран каждый кадр
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         GL_CHECK_ERRORS;
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GL_CHECK_ERRORS;
 
@@ -297,10 +270,13 @@ int main(int argc, char **argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // draw call
-        //
-        glBindVertexArray(g_vertexArrayObject);
-        GL_CHECK_ERRORS;
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        //
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texture);
+//        glBindVertexArray(g_vertexArrayObject);
+//        GL_CHECK_ERRORS;
+//        glDrawArrays(GL_TRIANGLES, 0, 3 * vertices.size());
+        model1.Draw(program);
         GL_CHECK_ERRORS;  // The last parameter of glDrawArrays is equal to VS invocations
 
 
@@ -310,9 +286,11 @@ int main(int argc, char **argv) {
     }
 
     //очищаем vboи vao перед закрытием программы
-    //
-    glDeleteVertexArrays(1, &g_vertexArrayObject);
-    glDeleteBuffers(1, &g_vertexBufferObject);
+//    //
+//    glDeleteVertexArrays(1, &g_vertexArrayObject);
+//    glDeleteBuffers(1, &g_vertexBufferObject);
+//    SOIL_free_image_data(image);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     glfwTerminate();
     return 0;
