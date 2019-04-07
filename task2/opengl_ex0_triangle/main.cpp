@@ -26,7 +26,7 @@
 
 using namespace std;
 
-static const GLsizei WIDTH = 640, HEIGHT = 480; //размеры окна
+static const GLsizei WIDTH = 1024, HEIGHT = 780; //размеры окна
 
 int initGL() {
     int res = 0;
@@ -157,11 +157,11 @@ int main(int argc, char **argv) {
     glfwSwapInterval(1); // force 60 frames per second
 
     //matrices of view
-    glm::mat4 proj = glm::perspective(45.0f, (float)WIDTH/(float)HEIGHT, 0.1f, 100.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)WIDTH/(float)HEIGHT, 0.1f, 100.0f);
     glm::mat4 model(1.0f);
-    model = glm::rotate(model, 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(35.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 view(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    view = glm::translate(view, glm::vec3(1.0f, 0.0f, -6.0f));
 
 
     glEnable(GL_DEPTH_TEST);
@@ -170,7 +170,8 @@ int main(int argc, char **argv) {
     glCullFace(GL_FRONT);
     glFrontFace(GL_CW);
 
-    Model model1("../objects/cup.obj");
+    Model model1("../objects/sphere.obj", "sphere");
+    Model model2("../objects/cup.obj", "cup");
     //Создаем и загружаем геометрию поверхности
     //
 
@@ -277,6 +278,7 @@ int main(int argc, char **argv) {
 //        GL_CHECK_ERRORS;
 //        glDrawArrays(GL_TRIANGLES, 0, 3 * vertices.size());
         model1.Draw(program);
+        model2.Draw(program);
         GL_CHECK_ERRORS;  // The last parameter of glDrawArrays is equal to VS invocations
 
 

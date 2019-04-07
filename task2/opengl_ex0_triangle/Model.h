@@ -30,10 +30,11 @@ public:
     vector<Mesh> meshes;
     string directory;
     bool gammaCorrection;
+    string type;
 
     /*  Functions   */
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
+    Model(string const &path, string Type = "sphere", bool gamma = false) : gammaCorrection(gamma), type(Type)
     {
         loadModel(path);
     }
@@ -148,72 +149,46 @@ private:
         // specular: texture_specularN
         // normal: texture_normalN
 
-        // 1. diffuse maps
-        vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        // 2. specular maps
-        vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        // 3. normal maps
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-        // 4. height maps
-        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-//if sphere
-        Texture texture;
-        texture.id = TextureFromFile("Rock_032_basecolor.jpg", "../textures");
-        texture.type = "texture_diffuse";
-        texture.path = "Rock_032_basecolor.jpg";
-        textures.push_back(texture);
-        textures_loaded.push_back(texture);
-        texture.id = TextureFromFile("Rock_032_normal.jpg", "../textures");
-        texture.type = "texture_normal";
-        texture.path = "Rock_032_normal.jpg";
-        textures.push_back(texture);
-        textures_loaded.push_back(texture);
-        texture.id = TextureFromFile("Rock_032_height.png", "../textures");
-        texture.type = "texture_height";
-        texture.path = "Rock_032_height.png";
-        textures.push_back(texture);
-        textures_loaded.push_back(texture);
+
+        if (type == "sphere") {
+            Texture texture;
+            texture.id = TextureFromFile("marble.jpg", "../textures");
+            texture.type = "texture_diffuse";
+            texture.path = "marble.jpg";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("marble_normal.jpg", "../textures");
+            texture.type = "texture_normal";
+            texture.path = "marble_normal.jpg";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("marble_height.jpg", "../textures");
+            texture.type = "texture_height";
+            texture.path = "marble_height.jpg";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+        } else if (type == "cup") {
+            Texture texture;
+            texture.id = TextureFromFile("quartz_diffuse.jpg", "../textures");
+            texture.type = "texture_diffuse";
+            texture.path = "quartz_diffuse.jpg";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("quartz_normal.jpg", "../textures");
+            texture.type = "texture_normal";
+            texture.path = "quartz_normal.jpg";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("quartz_height.jpg", "../textures");
+            texture.type = "texture_height";
+            texture.path = "quartz_height.jpg";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+
+        }
 
         // return a mesh object created from the extracted mesh data
         return Mesh(vertices, indices, textures);
-    }
-
-    // checks all material textures of a given type and loads the textures if they're not loaded yet.
-    // the required info is returned as a Texture struct.
-    vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
-    {
-        vector<Texture> textures;
-        for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-        {
-            aiString str;
-            mat->GetTexture(type, i, &str);
-            // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-            bool skip = false;
-            for(unsigned int j = 0; j < textures_loaded.size(); j++)
-            {
-                if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
-                {
-                    textures.push_back(textures_loaded[j]);
-                    skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
-                    break;
-                }
-            }
-            cout << "hey" << endl;
-            if(!skip)
-            {   // if texture hasn't been loaded already, load it
-                Texture texture;
-                texture.id = TextureFromFile(str.C_Str(), this->directory);//"marble.jpg", "../textures");
-                texture.type = typeName;
-                texture.path = str.C_Str();//"marble.jpg";
-                textures.push_back(texture);
-                textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-            }
-        }
-        return textures;
     }
 };
 
@@ -222,7 +197,6 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 {
     string filename = string(path);
     filename = directory + '/' + filename;
-
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
@@ -237,7 +211,6 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
             format = GL_RGB;
         else if (nrComponents == 4)
             format = GL_RGBA;
-        cout << "hi" << endl;
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
