@@ -20,6 +20,8 @@
 #include <vector>
 using namespace std;
 
+bool z_test = false;
+GLuint FramebufferName = 0;
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
 class Model
@@ -150,41 +152,75 @@ private:
         // normal: texture_normalN
 
 
-        if (type == "sphere") {
+        if (type == "fabric") {
             Texture texture;
-            texture.id = TextureFromFile("marble.jpg", "../textures");
+            texture.id = TextureFromFile("fabric_diffuse.dds", "../textures");
             texture.type = "texture_diffuse";
-            texture.path = "marble.jpg";
+            texture.path = "fabric_diffuse.dds";
             textures.push_back(texture);
             textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("marble_normal.jpg", "../textures");
+            texture.id = TextureFromFile("fabric_normal.dds", "../textures");
             texture.type = "texture_normal";
-            texture.path = "marble_normal.jpg";
+            texture.path = "fabric_normal.dds";
             textures.push_back(texture);
             textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("marble_height.jpg", "../textures");
+            texture.id = TextureFromFile("fabric_height.dds", "../textures");
             texture.type = "texture_height";
-            texture.path = "marble_height.jpg";
+            texture.path = "fabric_height.dds";
             textures.push_back(texture);
             textures_loaded.push_back(texture);
         } else if (type == "cup") {
             Texture texture;
-            texture.id = TextureFromFile("quartz_diffuse.jpg", "../textures");
+            texture.id = TextureFromFile("quartz_diffuse.dds", "../textures");
             texture.type = "texture_diffuse";
-            texture.path = "quartz_diffuse.jpg";
+            texture.path = "quartz_diffuse.dds";
             textures.push_back(texture);
             textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("quartz_normal.jpg", "../textures");
+            texture.id = TextureFromFile("quartz_normal.dds", "../textures");
             texture.type = "texture_normal";
-            texture.path = "quartz_normal.jpg";
+            texture.path = "quartz_normal.dds";
             textures.push_back(texture);
             textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("quartz_height.jpg", "../textures");
+            texture.id = TextureFromFile("quartz_height.dds", "../textures");
             texture.type = "texture_height";
-            texture.path = "quartz_height.jpg";
+            texture.path = "quartz_height.dds";
             textures.push_back(texture);
             textures_loaded.push_back(texture);
 
+        } else if (type == "bowl") {
+            Texture texture;
+            texture.id = TextureFromFile("quartz_diffuse.dds", "../textures");
+            texture.type = "texture_diffuse";
+            texture.path = "quartz_diffuse.dds";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("quartz_normal.dds", "../textures");
+            texture.type = "texture_normal";
+            texture.path = "quartz_normal.dds";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("quartz_height.dds", "../textures");
+            texture.type = "texture_height";
+            texture.path = "quartz_height.dds";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+        } else if (type == "plane") {
+            Texture texture;
+            texture.id = TextureFromFile("wood_diffuse.dds", "../textures");
+            texture.type = "texture_diffuse";
+            texture.path = "wood_diffuse.dds";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("wood_normal.dds", "../textures");
+            texture.type = "texture_normal";
+            texture.path = "wood_normal.dds";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+            texture.id = TextureFromFile("wood_height.dds", "../textures");
+            texture.type = "texture_height";
+            texture.path = "wood_height.dds";
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
         }
 
         // return a mesh object created from the extracted mesh data
