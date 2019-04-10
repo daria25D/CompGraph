@@ -7,6 +7,8 @@ layout(location = 2) in vec2 vertexUV;
 layout(location = 3) in vec3 vertexTangent;
 layout(location = 4) in vec4 vertexBitangent;
 
+uniform vec3 lightPos;
+uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
 uniform mat4 proj;
 uniform mat4 view;
@@ -25,11 +27,11 @@ out VS_OUT {
     vec3 TangentLightPos;
     vec3 TangentViewPos;
     vec3 TangentFragPos;
+    vec4 FragPosLightSpace;
 } vs_out;
 
 void main()
 {
-    vec3 lightPos = vec3(5.0f, 5.0f, 5.0f);
     vec3 viewPos = vec3(0.0f, 0.0f, 0.0f);
     vs_out.FragPos = vec3(model * vec4(vertexPosition, 1.0));
     vs_out.TexCoords = vertexUV;
@@ -44,6 +46,13 @@ void main()
     vs_out.TangentLightPos = TBN * lightPos;
     vs_out.TangentViewPos  = TBN * viewPos;
     vs_out.TangentFragPos  = TBN * vs_out.FragPos;
+    mat4 bias = mat4(
+    			0.5, 0.0, 0.0, 0.0,
+    			0.0, 0.5, 0.0, 0.0,
+    			0.0, 0.0, 0.5, 0.0,
+    			0.5, 0.5, 0.5, 1.0
+    );
 
+    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
     gl_Position = proj * view * model * vec4(vertexPosition, 1.0);
 }

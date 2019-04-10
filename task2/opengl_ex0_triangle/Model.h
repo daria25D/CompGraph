@@ -36,7 +36,7 @@ public:
 
     /*  Functions   */
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path, string Type = "sphere", bool gamma = false) : gammaCorrection(gamma), type(Type)
+    Model(string const &path, string Type, bool gamma = false) : gammaCorrection(gamma), type(Type)
     {
         loadModel(path);
     }
@@ -151,77 +151,7 @@ private:
         // specular: texture_specularN
         // normal: texture_normalN
 
-
-        if (type == "fabric") {
-            Texture texture;
-            texture.id = TextureFromFile("fabric_diffuse.dds", "../textures");
-            texture.type = "texture_diffuse";
-            texture.path = "fabric_diffuse.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("fabric_normal.dds", "../textures");
-            texture.type = "texture_normal";
-            texture.path = "fabric_normal.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("fabric_height.dds", "../textures");
-            texture.type = "texture_height";
-            texture.path = "fabric_height.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-        } else if (type == "cup") {
-            Texture texture;
-            texture.id = TextureFromFile("quartz_diffuse.dds", "../textures");
-            texture.type = "texture_diffuse";
-            texture.path = "quartz_diffuse.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("quartz_normal.dds", "../textures");
-            texture.type = "texture_normal";
-            texture.path = "quartz_normal.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("quartz_height.dds", "../textures");
-            texture.type = "texture_height";
-            texture.path = "quartz_height.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-
-        } else if (type == "bowl") {
-            Texture texture;
-            texture.id = TextureFromFile("quartz_diffuse.dds", "../textures");
-            texture.type = "texture_diffuse";
-            texture.path = "quartz_diffuse.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("quartz_normal.dds", "../textures");
-            texture.type = "texture_normal";
-            texture.path = "quartz_normal.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("quartz_height.dds", "../textures");
-            texture.type = "texture_height";
-            texture.path = "quartz_height.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-        } else if (type == "plane") {
-            Texture texture;
-            texture.id = TextureFromFile("wood_diffuse.dds", "../textures");
-            texture.type = "texture_diffuse";
-            texture.path = "wood_diffuse.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("wood_normal.dds", "../textures");
-            texture.type = "texture_normal";
-            texture.path = "wood_normal.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-            texture.id = TextureFromFile("wood_height.dds", "../textures");
-            texture.type = "texture_height";
-            texture.path = "wood_height.dds";
-            textures.push_back(texture);
-            textures_loaded.push_back(texture);
-        }
+        //TODO seems like this part should be done separately
 
         // return a mesh object created from the extracted mesh data
         return Mesh(vertices, indices, textures);
