@@ -24,18 +24,20 @@ uniform mat4 view;
 out VS_OUT {
     vec3 FragPos;
     vec2 TexCoords;
+    vec3 Normal;
     vec3 TangentLightPos;
     vec3 TangentViewPos;
     vec3 TangentFragPos;
-    vec4 FragPosLightSpace;
 } vs_out;
+
+out vec4 ShadowCoord;
 
 void main()
 {
     vec3 viewPos = vec3(0.0f, 0.0f, 0.0f);
     vs_out.FragPos = vec3(model * vec4(vertexPosition, 1.0));
     vs_out.TexCoords = vertexUV;
-
+    vs_out.Normal = vertexNormal;
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 T = normalize(normalMatrix * vertexTangent);
     vec3 N = normalize(normalMatrix * vertexNormal);
@@ -53,6 +55,7 @@ void main()
     			0.5, 0.5, 0.5, 1.0
     );
 
-    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
+    ShadowCoord = bias * lightSpaceMatrix * model * vec4(vs_out.FragPos, 1.0);
     gl_Position = proj * view * model * vec4(vertexPosition, 1.0);
+
 }
