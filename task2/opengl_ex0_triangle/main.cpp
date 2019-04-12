@@ -27,6 +27,8 @@
 
 using namespace std;
 
+bool z_test = false;
+
 static const GLsizei WIDTH = 1024, HEIGHT = 780; //размеры окна
 //bool z_test = true;
 bool pressedKeys[1024];
@@ -65,84 +67,6 @@ int initGL() {
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 
     return 0;
-}
-
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-
-void renderQuad() {
-    if (quadVAO == 0) {
-        float quadVertices[] = {
-                // positions        // texture Coords
-                -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        // setup plane VAO
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
-    }
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
-}
-
-void initFBO(int w, int h, GLuint FBO, GLuint &depthTexture) {
-    glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    glGenTextures(1, &depthTexture);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    GL_CHECK_ERRORS;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    GL_CHECK_ERRORS;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    GL_CHECK_ERRORS;
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-
-    glReadBuffer(GL_NONE);
-    glDrawBuffer(GL_NONE);
-
-    //glBindTexture(GL_TEXTURE_2D, depthTexture);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
-
-
-    GL_CHECK_ERRORS;
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO[0]\n");
-    }
-    // switch back to window-system-provided framebuffer
-    glClear(GL_DEPTH_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void bindFBO(GLuint FBO) {
-    glBindTexture(GL_TEXTURE_2D, 0); //Bad mojo to unbind the framebuffer using the texture
-    GL_CHECK_ERRORS;
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    GL_CHECK_ERRORS;
-    glClear(GL_DEPTH_BUFFER_BIT);
-    GL_CHECK_ERRORS;
-    //glColorMask(false,false,false,false);
-    glEnable(GL_DEPTH_TEST);
-    GL_CHECK_ERRORS;
 }
 
 vector<Texture> setup_texture(string type) {
@@ -247,6 +171,35 @@ void upload_texture(ShaderProgram shader, vector<Texture> textures) {
     }
 }
 
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 int main(int argc, char **argv) {
     if (!glfwInit())
         return -1;
@@ -276,21 +229,26 @@ int main(int argc, char **argv) {
     while (gl_error != GL_NO_ERROR)
         gl_error = glGetError();
 
-    //создание шейдерной программы из двух файлов с исходниками шейдеров
     //используется класс-обертка ShaderProgram
     unordered_map<GLenum, string> shaders;
     unordered_map<GLenum, string> shadersDepth;
+    unordered_map<GLenum, string> shadersPass;
     //if (!z_test) {
     shaders[GL_VERTEX_SHADER] = "vertex.glsl";
     shaders[GL_FRAGMENT_SHADER] = "fragment.glsl";
     //} else {
     shadersDepth[GL_VERTEX_SHADER] = "z_test_vert.glsl";
     shadersDepth[GL_FRAGMENT_SHADER] = "z_test_frag.glsl";
+
+    shadersPass[GL_VERTEX_SHADER] = "pass_vert.glsl";
+    shadersPass[GL_FRAGMENT_SHADER] = "pass_frag.glsl";
+
     //}
     ShaderProgram program(shaders);
     GL_CHECK_ERRORS;
     ShaderProgram depth_prog(shadersDepth);
     //ShaderProgram post_prog(shaders);
+    ShaderProgram quad_prog(shadersPass);
 
     GL_CHECK_ERRORS;
     glfwSwapInterval(1); // force 60 frames per second
@@ -312,8 +270,59 @@ int main(int argc, char **argv) {
     GLuint FBO = 0;
     GLuint depthMap;
     int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-    initFBO(SHADOW_WIDTH, SHADOW_HEIGHT, FBO, depthMap);
+    //initFBO(SHADOW_WIDTH, SHADOW_HEIGHT, FBO, depthMap);
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     GL_CHECK_ERRORS;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    GL_CHECK_ERRORS;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    GL_CHECK_ERRORS;
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+
+    //glReadBuffer(GL_NONE);
+    glDrawBuffer(GL_NONE);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+
+
+    GL_CHECK_ERRORS;
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
+    }
+    // switch back to window-system-provided framebuffer
+    //glClear(GL_DEPTH_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
+    GL_CHECK_ERRORS;
+
+    //quad
+//    static const GLfloat g_quad_vertex_buffer_data[] = {
+//            -1.0f, -1.0f, 0.0f,
+//            1.0f, -1.0f, 0.0f,
+//            -1.0f,  1.0f, 0.0f,
+//            -1.0f,  1.0f, 0.0f,
+//            1.0f, -1.0f, 0.0f,
+//            1.0f,  1.0f, 0.0f,
+//    };
+//
+//    GLuint quad_vertexbuffer;
+//    glGenBuffers(1, &quad_vertexbuffer);
+//    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+//    GL_CHECK_ERRORS;
+
 
 
     Model model1("../objects/fabric.obj", "fabric");
@@ -326,7 +335,7 @@ int main(int argc, char **argv) {
     vector<Texture> plane_texture = setup_texture("plane");
     Model model5("../objects/sponge.obj", "sponge");
     vector<Texture> sponge_texture = setup_texture("sponge");
-
+    GL_CHECK_ERRORS;
 
     auto t_start = chrono::high_resolution_clock::now();
     glm::vec3 lightPos(.0f, 2.0f, 6.0f);
@@ -334,17 +343,21 @@ int main(int argc, char **argv) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         processActionKeys();
-        glCullFace(GL_BACK);
         GL_CHECK_ERRORS;
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
         GL_CHECK_ERRORS;
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        GL_CHECK_ERRORS;
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        GL_CHECK_ERRORS;
+        //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        //GL_CHECK_ERRORS;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GL_CHECK_ERRORS;
+
+        depth_prog.StartUseShader();
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
         model = glm::mat4(1.0f);
         model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
 
@@ -354,8 +367,6 @@ int main(int argc, char **argv) {
         lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
         lightSpaceMatrix = lightProjection * lightView;
 
-        depth_prog.StartUseShader();
-
         glUniformMatrix4fv(glGetUniformLocation(depth_prog.GetProgram(), "lightSpaceMatrix"), 1, GL_FALSE,
                            &lightSpaceMatrix[0][0]);
         GLint modelLocDepth = glGetUniformLocation(depth_prog.GetProgram(), "model");
@@ -363,8 +374,8 @@ int main(int argc, char **argv) {
         glUniformMatrix4fv(modelLocDepth, 1, GL_FALSE, glm::value_ptr(model));
         GL_CHECK_ERRORS;
 
-        glClear(GL_DEPTH_BUFFER_BIT);
-        GL_CHECK_ERRORS;
+        //glClear(GL_DEPTH_BUFFER_BIT);
+        //GL_CHECK_ERRORS;
 
         model1.Draw(depth_prog);
         model2.Draw(depth_prog);
@@ -373,7 +384,6 @@ int main(int argc, char **argv) {
         auto t_now = chrono::high_resolution_clock::now();
         float time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
         model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
-
         model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         modelLocDepth = glGetUniformLocation(depth_prog.GetProgram(), "model");
         GL_CHECK_ERRORS;
@@ -383,79 +393,82 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCullFace(GL_FRONT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glViewport(0, 0, WIDTH, HEIGHT);
 
+        program.StartUseShader();
 
-        depth_prog.StopUseShader();
-        if (!z_test) {
-            glCullFace(GL_FRONT);
+        glViewport(0, 0, WIDTH, HEIGHT);
+        GL_CHECK_ERRORS;
+        GL_CHECK_ERRORS;
+        glUniform3fv(glGetUniformLocation(program.GetProgram(), "lightPos"), 1, &lightPos[0]);
+        GL_CHECK_ERRORS;
+        glUniformMatrix4fv(glGetUniformLocation(program.GetProgram(), "lightSpaceMatrix"), 1, GL_FALSE,
+                           &lightSpaceMatrix[0][0]);
+        model = glm::mat4(1.0);
+        model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
+        GL_CHECK_ERRORS;
+        GLint modelLoc = glGetUniformLocation(program.GetProgram(), "model");
+        GL_CHECK_ERRORS;
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        GL_CHECK_ERRORS;
+
+        GLint projLoc = glGetUniformLocation(program.GetProgram(), "proj");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+        GL_CHECK_ERRORS;
+
+        GLint viewLoc = glGetUniformLocation(program.GetProgram(), "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        GL_CHECK_ERRORS;
+
+        // очистка и заполнение экрана цветом
+        //
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE4);
+        GL_CHECK_ERRORS;
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        GL_CHECK_ERRORS;
+        glUniform1i(glGetUniformLocation(program.GetProgram(), "shadowMap"), 4);
+
+        // draw call
+        GL_CHECK_ERRORS;
+
+        upload_texture(program, fabric_texture);
+        model1.Draw(program);
+        upload_texture(program, cup_texture);
+        model2.Draw(program);
+        upload_texture(program, bowl_texture);
+        model3.Draw(program);
+        upload_texture(program, plane_texture);
+        model4.Draw(program);
+        t_now = chrono::high_resolution_clock::now();
+        time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
+        model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
+
+        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));// *
+        // glm::translate(model, glm::vec3(radius * cos(theta), 0.0, radius * sin(theta)));
+
+        modelLoc = glGetUniformLocation(program.GetProgram(), "model");
+        GL_CHECK_ERRORS;
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        GL_CHECK_ERRORS;
+        upload_texture(program, sponge_texture);
+        model5.Draw(program);
+
+        if (z_test) {
+            glViewport(0,0,WIDTH,HEIGHT);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            glViewport(0, 0, WIDTH, HEIGHT);
-
-            program.StartUseShader();
-
-            glViewport(0, 0, WIDTH, HEIGHT);
-            //glActiveTexture(GL_TEXTURE4);
-            GL_CHECK_ERRORS;
-            //glBindTexture(GL_TEXTURE_2D, depthMap);
-            GL_CHECK_ERRORS;
-            glUniform3fv(glGetUniformLocation(program.GetProgram(), "lightPos"), 1, &lightPos[0]);
-            GL_CHECK_ERRORS;
-            glUniformMatrix4fv(glGetUniformLocation(program.GetProgram(), "lightSpaceMatrix"), 1, GL_FALSE,
-                               &lightSpaceMatrix[0][0]);
-            model = glm::mat4(1.0);
-            model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
-            GL_CHECK_ERRORS;
-            GLint modelLoc = glGetUniformLocation(program.GetProgram(), "model");
-            GL_CHECK_ERRORS;
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            GL_CHECK_ERRORS;
-
-            GLint projLoc = glGetUniformLocation(program.GetProgram(), "proj");
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-            GL_CHECK_ERRORS;
-
-            GLint viewLoc = glGetUniformLocation(program.GetProgram(), "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-            GL_CHECK_ERRORS;
-
-            // очистка и заполнение экрана цветом
-            //
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glActiveTexture(GL_TEXTURE4);
-            GL_CHECK_ERRORS;
+            quad_prog.StartUseShader();
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, depthMap);
-            GL_CHECK_ERRORS;
-            //glUniform1i(glGetUniformLocation(program.GetProgram(), "shadowMap"), 4);
+            GLuint texID = glGetUniformLocation(quad_prog.GetProgram(), "shadowMap");
+            glUniform1i(texID, 0);
+            renderQuad();
 
-            // draw call
-            GL_CHECK_ERRORS;
-
-            upload_texture(program, fabric_texture);
-            model1.Draw(program);
-            upload_texture(program, cup_texture);
-            model2.Draw(program);
-            upload_texture(program, bowl_texture);
-            model3.Draw(program);
-            upload_texture(program, plane_texture);
-            model4.Draw(program);
-            auto t_now = chrono::high_resolution_clock::now();
-            float time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
-            model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
-
-            model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));// *
-            // glm::translate(model, glm::vec3(radius * cos(theta), 0.0, radius * sin(theta)));
-
-            modelLoc = glGetUniformLocation(program.GetProgram(), "model");
-            GL_CHECK_ERRORS;
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            GL_CHECK_ERRORS;
-            upload_texture(program, sponge_texture);
-            model5.Draw(program);
-
-            //renderQuad();
-            program.StopUseShader();
         }
+
         glfwSwapBuffers(window);
     }
 

@@ -20,7 +20,6 @@
 #include <vector>
 using namespace std;
 
-bool z_test = false;
 GLuint FramebufferName = 0;
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
