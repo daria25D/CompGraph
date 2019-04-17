@@ -1,0 +1,3 @@
+/home/daria/Documents/III_course/CompGraph/task2/shadowMap/build/CMakeFiles/rebuild_cache.dir
+/home/daria/Documents/III_course/CompGraph/task2/shadowMap/build/CMakeFiles/main.dir
+/home/daria/Documents/III_course/CompGraph/task2/shadowMap/build/CMakeFiles/edit_cache.dir
