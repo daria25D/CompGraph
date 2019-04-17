@@ -1,6 +1,5 @@
 #version 330
 uniform mat4 g_rayMatrix;
-//uniform vec3 cam_pos;
 uniform int g_screenWidth;
 uniform int g_screenHeight;
 
@@ -9,7 +8,7 @@ in vec2 fragmentTexCoord;
 out vec4 color;
 
 const int NUM_OF_LIGHTS = 2;
-const float MAX_DIST = 50;
+const float MAX_DIST = 60;
 const float REFRACTION_OUTSIDE = 1.0002;
 const float REFLECTIVITY = 0.01;
 
@@ -127,7 +126,7 @@ vec3 calculate_normal(vec3 p) {
 
     return normalize(normal);
 }
-
+//material initialization
 Material diamond_material() {
     Material diamond_mat;
     diamond_mat.color        = vec3(0.8, 0.8, 0.95);
@@ -139,7 +138,6 @@ Material diamond_material() {
     diamond_mat.k_refraction = 1.25;
     return diamond_mat;
 }
-
 Material ellipsoid_material() {
     Material ellipsoid_mat;
     ellipsoid_mat.color        = vec3(0.9, 0.7, 0.8);
@@ -151,7 +149,6 @@ Material ellipsoid_material() {
     ellipsoid_mat.k_refraction = 0.0;
     return ellipsoid_mat;
 }
-
 Material torus_material() {
     Material torus_mat;
     torus_mat.color        = vec3(0.9, 0.7, 0.0);
@@ -185,7 +182,7 @@ Material cube_material() {
     cube_mat.k_refraction = 0.0;
     return cube_mat;
 }
-
+//calculate color of the closest object
 vec3 color_of_closest_object(vec2 obj) {
     vec3 color = vec3(0.0);
     if (obj.y == DIAMOND) {
@@ -204,7 +201,7 @@ vec3 color_of_closest_object(vec2 obj) {
     }
     return material.color;
 }
-
+//distance to object that casted ray intersects
 vec2 intersection_point(vec3 ray_pos, vec3 ray_dir) {
     float t = 0.0;
     vec3 obj = vec3(0.0);
@@ -216,7 +213,7 @@ vec2 intersection_point(vec3 ray_pos, vec3 ray_dir) {
     }
     return obj.zy;
 }
-
+//calculate ambient occlusion coefficient
 float ambient_occlusion(vec3 p, vec3 n, float k){
     float delta = 0.5;
     float a = 0.0;
@@ -229,7 +226,7 @@ float ambient_occlusion(vec3 p, vec3 n, float k){
     }
     return clamp(1.0 - k*a, 0.0, 1.0);
 }
-
+//calculate shadow coefficient
 float soft_shadow(vec3 ray_pos, vec3 ray_dir){
     float res = 1.0, t = 0.01;
     float ph = 1e20;
@@ -245,11 +242,10 @@ float soft_shadow(vec3 ray_pos, vec3 ray_dir){
     }
     return clamp(res, 0.0, 1.0);
 }
-
+//function for diamond that refracts light
 vec3 glass_refraction(vec3 pos, vec3 ray_dir, vec3 normal, float k_refract, vec3 main_color) {
     vec3 refl = reflect(ray_dir, normal);
     vec2 refl_obj = intersection_point(pos, refl);
-
     vec3 refl_pos = pos + refl_obj.x*refl;
     vec3 refl_color = color_of_closest_object(refl_obj);
     vec3 refl_normal = calculate_normal(refl_pos);
@@ -266,14 +262,14 @@ vec3 glass_refraction(vec3 pos, vec3 ray_dir, vec3 normal, float k_refract, vec3
     color *= main_color * occ;
     return color;
 }
-
+//fog
 vec3 apply_fog(vec3 color, float distance, vec3 ray_dir, vec3 light_dir1, vec3 light_dir2) {
     float fog_amount = 1.0 - exp(-distance * distance * 0.0005);
     float sun_amount = max(max(dot(ray_dir, light_dir1), dot(ray_dir, light_dir2)), 0.0);
     vec3 fog_color = mix(vec3(0.5, 0.6, 0.7), vec3(1.0, 0.9, 0.7), pow(sun_amount, 8.0));
     return mix(color, fog_color, fog_amount);
 }
-
+//calculate final color
 vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
     vec2 obj = intersection_point(ray_pos, ray_dir);
     vec3 pos = ray_pos + obj.x*ray_dir;
@@ -310,12 +306,13 @@ vec3 render(vec3 ray_pos, vec3 ray_dir, vec3 light_position[NUM_OF_LIGHTS]) {
     } else {
         final_color += vec3(((material.k_diffuse*(diffuse1 + diffuse2) + material.k_ambient*ambient_occ) * color)
                               * 0.5*(shadow1 + shadow2) + material.k_specular*(specular1 + specular2)) ;
-        final_color = apply_fog(final_color, obj.x, ray_dir, light_dir1, light_dir2);
     }
+    final_color = apply_fog(final_color, obj.x, ray_dir, light_dir1, light_dir2);
     return final_color;
 }
 
 void main() {
+    //camera adjustments
     vec2 tmp = 0.5 + vec2(fragmentTexCoord.x * g_screenWidth /2, fragmentTexCoord.y * g_screenHeight /2); //try to change
     vec3 ray_dir = normalize(vec3(tmp, -(g_screenWidth)/tan(3.14159265/3)));
     mat3 rdMat = mat3(g_rayMatrix);//multiply rayMatrix 3x3 x rd
@@ -325,7 +322,6 @@ void main() {
     vec3 light_position[NUM_OF_LIGHTS];
     light_position[0] = vec3(4.0, 7.0, 7.0);
     light_position[1] = vec3(-2.0, 7.0, 3.0);
-
 
     color = vec4(render(ray_pos, ray_dir, light_position), 1.0);
 }

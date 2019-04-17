@@ -12,6 +12,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f1fc556-0fc6-447a-886d-f01e6ed1d1ee" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/pass_frag.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/pass_vert.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/README.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/CMakeCache.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/3.13.2/CMakeCCompiler.cmake" beforeDir="false" />
@@ -27,7 +29,6 @@
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/Makefile.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/CMakeFiles/Makefile.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/Makefile2" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/CMakeFiles/Makefile2" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/clion-environment.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/clion-log.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/main.dir/build.make" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/CMakeFiles/main.dir/build.make" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/main.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/CMakeFiles/main.dir/flags.make" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/CMakeFiles/main.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/CMakeFiles/main.dir/link.txt" afterDir="false" />
@@ -36,8 +37,34 @@
       <change beforePath="$PROJECT_DIR$/../task1/build/fragment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/build/fragment.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/build/main.cbp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../task1/shaders/fragment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/../task1/shaders/fragment.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/Model.h" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/Model.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeCache.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/CXX.includecache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/depend.internal" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/depend.internal" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/depend.make" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/depend.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/link.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/CMakeFiles/main.dir/main.cpp.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/fragment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/fragment.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/main" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/main" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/main.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/main.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/vertex.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/vertex.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cube.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/cube.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/fragment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/fragment.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/vertex.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/vertex.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_frag.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_frag.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_vert.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_vert.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/textures/paper.bmp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/opengl_ex0_triangle/textures/texture1.bmp" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/opengl_ex0_triangle/cmake-build-debug/" />
+    <ignored mask="*jpg" />
+    <ignored mask="*zip" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,8 +77,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="49" column="89" selection-start-line="49" selection-start-column="89" selection-end-line="49" selection-end-column="89" />
+            <state relative-caret-position="216">
+              <caret line="12" column="11" selection-start-line="12" selection-start-column="11" selection-end-line="12" selection-end-column="11" />
             </state>
           </provider>
         </entry>
@@ -59,11 +86,35 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
-              <caret line="256" column="58" selection-start-line="256" selection-start-column="58" selection-end-line="256" selection-end-column="58" />
+            <state relative-caret-position="5215">
+              <caret line="354" column="21" selection-start-line="354" selection-start-column="21" selection-end-line="354" selection-end-column="21" />
               <folding>
                 <element signature="e#20#39#0" expanded="true" />
-                <element signature="e#132#155#0" expanded="true" />
+                <element signature="e#110#133#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/Mesh.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="264">
+              <caret line="79" column="93" selection-start-line="79" selection-start-column="93" selection-end-line="79" selection-end-column="93" />
+              <folding>
+                <element signature="e#44#66#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/Model.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-3876">
+              <caret line="22" column="18" selection-start-line="22" selection-start-column="18" selection-end-line="22" selection-end-column="18" />
+              <folding>
+                <element signature="e#46#68#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -72,8 +123,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/fragment.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="9" column="2" selection-start-line="9" selection-start-column="2" selection-end-line="9" selection-end-column="2" />
+            <state relative-caret-position="526">
+              <caret line="40" column="41" selection-start-line="40" selection-start-column="41" selection-end-line="40" selection-end-column="41" />
             </state>
           </provider>
         </entry>
@@ -81,51 +132,56 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/vertex.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="10" selection-start-line="10" selection-end-line="10" />
+            <state relative-caret-position="882">
+              <caret line="49" column="76" selection-start-line="49" selection-start-column="76" selection-end-line="49" selection-end-column="76" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/ShaderProgram.h">
+        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_frag.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="379">
-              <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
+            <state relative-caret-position="72">
+              <caret line="4" column="36" selection-start-line="4" selection-start-column="36" selection-end-line="5" selection-end-column="28" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/ShaderProgram.cpp">
+        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_vert.glsl">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-258">
-              <caret line="169" column="53" selection-start-line="169" selection-start-column="53" selection-end-line="169" selection-end-column="53" />
+            <state relative-caret-position="90">
+              <caret line="5" column="18" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/README.md">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="19" selection-start-column="19" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/common.h">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="GLSL Shader" />
+      </list>
+    </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>Un</find>
       <find>SetUnif</find>
+      <find>STENCIL</find>
+      <find>stencil</find>
+      <find>texturefr</find>
+      <find>TextureFr</find>
+      <find>marble</find>
+      <find>jpg</find>
+      <find>depthShader</find>
     </findStrings>
+    <replaceStrings>
+      <replace>fabric</replace>
+      <replace>dds</replace>
+      <replace>depth_prog</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -133,20 +189,29 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/opengl_ex0_triangle/README.md" />
-        <option value="$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/opengl_ex0_triangle/ShaderProgram.h" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/Model.cpp" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/Mesh.cpp" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/README.md" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test.glsl" />
         <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/vertex.glsl" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_vert.glsl" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/Model.h" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/pass_vert.glsl" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/pass_frag.glsl" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/Mesh.h" />
         <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/fragment.glsl" />
+        <option value="$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_frag.glsl" />
         <option value="$PROJECT_DIR$/opengl_ex0_triangle/main.cpp" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="54" />
-    <option name="y" value="77" />
-    <option name="width" value="1400" />
-    <option name="height" value="1000" />
+    <option name="x" value="293" />
+    <option name="y" value="104" />
+    <option name="width" value="1390" />
+    <option name="height" value="986" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -181,7 +246,8 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../coursach" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -213,33 +279,43 @@
       <option name="presentableId" value="Default" />
       <updated>1554473417493</updated>
       <workItem from="1554473419114" duration="5192000" />
-      <workItem from="1554478968999" duration="6473000" />
+      <workItem from="1554478968999" duration="45903000" />
+      <workItem from="1554659003477" duration="22468000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11665000" />
+    <option name="totallyTimeSpent" value="73563000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-12" width="2062" height="1126" extended-state="6" />
+    <frame x="0" y="0" width="2048" height="1107" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.191" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.193" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32928064" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32928064" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32928064" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
       <window_info anchor="bottom" id="Messages" order="8" weight="0.32928064" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32928064" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="11" weight="0.21580547" />
-      <window_info anchor="bottom" id="CMake" order="12" weight="0.33029383" />
+      <window_info anchor="bottom" id="CMake" order="12" weight="0.32996973" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -271,38 +347,8 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/cube.obj">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/LiteMath.h">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/glad.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#498#516#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="19" selection-start-column="19" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/common.h">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="49" column="89" selection-start-line="49" selection-start-column="89" selection-end-line="49" selection-end-column="89" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/cube.obj" />
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/LiteMath.h" />
     <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/ShaderProgram.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="379">
@@ -314,13 +360,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-258">
           <caret line="169" column="53" selection-start-line="169" selection-start-column="53" selection-end-line="169" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/glm/ext/quaternion_transform.inl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" column="33" selection-start-line="3" selection-start-column="33" selection-end-line="3" selection-end-column="33" />
         </state>
       </provider>
     </entry>
@@ -353,34 +392,143 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/cup.obj" />
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/sphere.obj" />
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/plants.obj" />
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/glad.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-28242">
+          <folding>
+            <element signature="e#498#516#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/Mesh.cpp" />
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/Model.cpp" />
+    <entry file="file:///usr/include/SOIL/SOIL.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="367" column="4" selection-start-line="367" selection-start-column="4" selection-end-line="367" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/glm/ext/quaternion_transform.inl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="33" selection-start-line="3" selection-start-column="33" selection-end-line="3" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/glm/ext/matrix_clip_space.inl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="254" column="46" selection-start-line="254" selection-start-column="46" selection-end-line="254" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/glm/ext/matrix_transform.inl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="9" column="39" selection-start-line="9" selection-start-column="39" selection-end-line="9" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/dependencies/include/GLAD/glad/glad.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="211">
-          <caret line="3645" column="8" selection-start-line="3645" selection-start-column="8" selection-end-line="3645" selection-end-column="8" />
+          <caret line="2941" column="8" selection-start-line="2941" selection-start-column="8" selection-end-line="2941" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="12" column="11" selection-start-line="12" selection-start-column="11" selection-end-line="12" selection-end-column="11" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/vertex.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="10" selection-start-line="10" selection-end-line="10" />
+        <state relative-caret-position="882">
+          <caret line="49" column="76" selection-start-line="49" selection-start-column="76" selection-end-line="49" selection-end-column="76" />
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_vert.glsl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="5" column="18" selection-start-line="5" selection-start-column="18" selection-end-line="5" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/pass_vert.glsl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/pass_frag.glsl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/common.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-24" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/fragment.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="9" column="2" selection-start-line="9" selection-start-column="2" selection-end-line="9" selection-end-column="2" />
+        <state relative-caret-position="526">
+          <caret line="40" column="41" selection-start-line="40" selection-start-column="41" selection-end-line="40" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/shaders/z_test_frag.glsl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="36" selection-start-line="4" selection-start-column="36" selection-end-line="5" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/Model.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3876">
+          <caret line="22" column="18" selection-start-line="22" selection-start-column="18" selection-end-line="22" selection-end-column="18" />
+          <folding>
+            <element signature="e#46#68#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/Mesh.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="79" column="93" selection-start-line="79" selection-start-column="93" selection-end-line="79" selection-end-column="93" />
+          <folding>
+            <element signature="e#44#66#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/opengl_ex0_triangle/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="256" column="58" selection-start-line="256" selection-start-column="58" selection-end-line="256" selection-end-column="58" />
+        <state relative-caret-position="5215">
+          <caret line="354" column="21" selection-start-line="354" selection-start-column="21" selection-end-line="354" selection-end-column="21" />
           <folding>
             <element signature="e#20#39#0" expanded="true" />
-            <element signature="e#132#155#0" expanded="true" />
+            <element signature="e#110#133#0" expanded="true" />
           </folding>
         </state>
       </provider>
