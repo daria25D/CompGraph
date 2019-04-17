@@ -8,7 +8,9 @@ set(SOURCE_FILES
     glad.c
     main.cpp
     ShaderProgram.h
-    ShaderProgram.cpp)
+    ShaderProgram.cpp
+    Mesh.h
+    Model.h)
 
 set(ADDITIONAL_INCLUDE_DIRS
         dependencies/include/GLAD)
@@ -47,6 +49,6 @@ if(WIN32)
   target_link_libraries(main LINK_PUBLIC ${OPENGL_gl_LIBRARY} glfw3dll)
 else()
   target_compile_options(main PRIVATE -Wnarrowing)
-  target_link_libraries(main LINK_PUBLIC ${OPENGL_gl_LIBRARY} glfw rt dl ${GLM_LIBRARIES})
+  target_link_libraries(main LINK_PUBLIC ${OPENGL_gl_LIBRARY} glfw rt dl ${GLM_LIBRARIES} SOIL assimp)
 endif()
 

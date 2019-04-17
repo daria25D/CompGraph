@@ -178,13 +178,11 @@ void renderQuad()
     if (quadVAO == 0)
     {
         float quadVertices[] = {
-            // positions        // texture Coords
             -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
             -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
              1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
              1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         };
-        // setup plane VAO
         glGenVertexArrays(1, &quadVAO);
         glGenBuffers(1, &quadVBO);
         glBindVertexArray(quadVAO);
@@ -233,28 +231,25 @@ int main(int argc, char **argv) {
     unordered_map<GLenum, string> shaders;
     unordered_map<GLenum, string> shadersDepth;
     unordered_map<GLenum, string> shadersPass;
-    //if (!z_test) {
+
     shaders[GL_VERTEX_SHADER] = "vertex.glsl";
     shaders[GL_FRAGMENT_SHADER] = "fragment.glsl";
-    //} else {
+
     shadersDepth[GL_VERTEX_SHADER] = "z_test_vert.glsl";
     shadersDepth[GL_FRAGMENT_SHADER] = "z_test_frag.glsl";
 
     shadersPass[GL_VERTEX_SHADER] = "pass_vert.glsl";
     shadersPass[GL_FRAGMENT_SHADER] = "pass_frag.glsl";
 
-    //}
     ShaderProgram program(shaders);
-    GL_CHECK_ERRORS;
     ShaderProgram depth_prog(shadersDepth);
-    //ShaderProgram post_prog(shaders);
     ShaderProgram quad_prog(shadersPass);
 
     GL_CHECK_ERRORS;
     glfwSwapInterval(1); // force 60 frames per second
 
     //matrices of view
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 120.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
     glm::mat4 model(1.0f);
     model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
     glm::mat4 view(1.0f);
@@ -266,11 +261,9 @@ int main(int argc, char **argv) {
     glCullFace(GL_FRONT);
     glFrontFace(GL_CW);
 
-    //depth map
     GLuint FBO = 0;
     GLuint depthMap;
-    int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-    //initFBO(SHADOW_WIDTH, SHADOW_HEIGHT, FBO, depthMap);
+    int SHADOW_WIDTH = 1512, SHADOW_HEIGHT = 1512;
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -288,42 +281,20 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-    //glReadBuffer(GL_NONE);
     glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-
 
     GL_CHECK_ERRORS;
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
     }
-    // switch back to window-system-provided framebuffer
-    //glClear(GL_DEPTH_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //glBindTexture(GL_TEXTURE_2D, 0);
     GL_CHECK_ERRORS;
-
-    //quad
-//    static const GLfloat g_quad_vertex_buffer_data[] = {
-//            -1.0f, -1.0f, 0.0f,
-//            1.0f, -1.0f, 0.0f,
-//            -1.0f,  1.0f, 0.0f,
-//            -1.0f,  1.0f, 0.0f,
-//            1.0f, -1.0f, 0.0f,
-//            1.0f,  1.0f, 0.0f,
-//    };
-//
-//    GLuint quad_vertexbuffer;
-//    glGenBuffers(1, &quad_vertexbuffer);
-//    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-//    GL_CHECK_ERRORS;
-
-
 
     Model model1("../objects/fabric.obj", "fabric");
     vector<Texture> fabric_texture = setup_texture("fabric");
@@ -338,8 +309,7 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
 
     auto t_start = chrono::high_resolution_clock::now();
-    glm::vec3 lightPos(.0f, 2.0f, 6.0f);
-    //цикл обработки сообщений и отрисовки сцены каждый кадр
+    glm::vec3 lightPos(1.0f, 6.5f, 0.7f);
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         processActionKeys();
@@ -347,9 +317,8 @@ int main(int argc, char **argv) {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         GL_CHECK_ERRORS;
-        //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        //GL_CHECK_ERRORS;
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GL_CHECK_ERRORS;
 
@@ -363,7 +332,7 @@ int main(int argc, char **argv) {
 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
-        lightProjection = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 120.0f);
+        lightProjection = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
         lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
         lightSpaceMatrix = lightProjection * lightView;
 
@@ -373,9 +342,6 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
         glUniformMatrix4fv(modelLocDepth, 1, GL_FALSE, glm::value_ptr(model));
         GL_CHECK_ERRORS;
-
-        //glClear(GL_DEPTH_BUFFER_BIT);
-        //GL_CHECK_ERRORS;
 
         model1.Draw(depth_prog);
         model2.Draw(depth_prog);
@@ -423,8 +389,6 @@ int main(int argc, char **argv) {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         GL_CHECK_ERRORS;
 
-        // очистка и заполнение экрана цветом
-        //
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE4);
         GL_CHECK_ERRORS;
@@ -432,7 +396,6 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
         glUniform1i(glGetUniformLocation(program.GetProgram(), "shadowMap"), 4);
 
-        // draw call
         GL_CHECK_ERRORS;
 
         upload_texture(program, fabric_texture);
@@ -447,8 +410,7 @@ int main(int argc, char **argv) {
         time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
         model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
 
-        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));// *
-        // glm::translate(model, glm::vec3(radius * cos(theta), 0.0, radius * sin(theta)));
+        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         modelLoc = glGetUniformLocation(program.GetProgram(), "model");
         GL_CHECK_ERRORS;
@@ -458,7 +420,8 @@ int main(int argc, char **argv) {
         model5.Draw(program);
 
         if (z_test) {
-            glViewport(0,0,WIDTH,HEIGHT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+            glViewport(0, 0, WIDTH, HEIGHT);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             quad_prog.StartUseShader();
             glActiveTexture(GL_TEXTURE0);
@@ -466,14 +429,9 @@ int main(int argc, char **argv) {
             GLuint texID = glGetUniformLocation(quad_prog.GetProgram(), "shadowMap");
             glUniform1i(texID, 0);
             renderQuad();
-
         }
-
         glfwSwapBuffers(window);
     }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     glfwTerminate();
     return 0;
 }

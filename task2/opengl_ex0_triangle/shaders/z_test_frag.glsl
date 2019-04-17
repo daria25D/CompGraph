@@ -12,6 +12,5 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-    //float depthValue = texture(shadowMap, gl_FragCoord.xy).z;
     FragColor = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / zFar), 1.0); // perspective
 }

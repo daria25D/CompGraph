@@ -55,7 +55,7 @@ void main()
     			0.5, 0.5, 0.5, 1.0
     );
 
-    ShadowCoord = bias * lightSpaceMatrix * model * vec4(vs_out.FragPos, 1.0);
+    ShadowCoord = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
     gl_Position = proj * view * model * vec4(vertexPosition, 1.0);
 
 }
