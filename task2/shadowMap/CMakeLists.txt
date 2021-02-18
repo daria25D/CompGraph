@@ -4,13 +4,13 @@ project(main)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-    common.h
-    glad.c
-    main.cpp
-    ShaderProgram.h
-    ShaderProgram.cpp
-    Mesh.h
-    Model.h)
+    ./source/common.h
+    ./source/glad.c
+    ./source/main.cpp
+    ./source/ShaderProgram.h
+    ./source/ShaderProgram.cpp
+    ./source/Mesh.h
+    ./source/Model.h)
 
 set(ADDITIONAL_INCLUDE_DIRS
         dependencies/include/GLAD)
