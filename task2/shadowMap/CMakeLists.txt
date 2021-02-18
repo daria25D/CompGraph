@@ -9,7 +9,7 @@ set(SOURCE_FILES
     ./source/main.cpp
     ./source/ShaderProgram.h
     ./source/ShaderProgram.cpp
-    ./source/Mesh.h
+    ./source/Mesh.cpp
     ./source/Model.h)
 
 set(ADDITIONAL_INCLUDE_DIRS
