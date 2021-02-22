@@ -1,19 +1,20 @@
 #include <glm/glm.hpp>
+#include <utility>
 #include "ShaderProgram.h"
 #include "Mesh.h"
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
-    this->vertices = vertices;
-    this->indices = indices;
-    this->textures = textures;
+    this->vertices = std::move(vertices);
+    this->indices = std::move(indices);
+    this->textures = std::move(textures);
 
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
     setupMesh();
 }
 
 // render the mesh
-void Mesh::Draw(ShaderProgram shader)
+void Mesh::Draw(const ShaderProgram& shader)
 {
     // bind appropriate textures
 

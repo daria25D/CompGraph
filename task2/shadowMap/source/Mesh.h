@@ -31,7 +31,7 @@ public:
     unsigned int VAO;
 
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
-    void Draw(ShaderProgram shader);
+    void Draw(const ShaderProgram& shader);
 
 private:
     /*  Render data  */
