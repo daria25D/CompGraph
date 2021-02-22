@@ -1,13 +1,14 @@
 //internal includes
 #include "common.h"
 #include "ShaderProgram.h"
+#include "Mesh.h"
+#include "Model.h"
 
 //External dependencies
 #define GLFW_DLL
 
 #include <GLFW/glfw3.h>
 #include <random>
-#include <string.h>
 #include <chrono>
 
 #include <glm/glm.hpp>
@@ -15,22 +16,11 @@
 #include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 
-#include <SOIL/SOIL.h>
-
-#include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
-#include <assimp/postprocess.h>     // Post processing flags
-
-
-#include "Mesh.h"
-#include "Model.h"
-
 using namespace std;
 
 bool z_test = false;
 
 static const GLsizei WIDTH = 1024, HEIGHT = 780; //размеры окна
-//bool z_test = true;
 bool pressedKeys[1024];
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
@@ -69,107 +59,6 @@ int initGL() {
     return 0;
 }
 
-vector<Texture> setup_texture(string type) {
-    vector<Texture> textures;
-    if (type == "fabric") {
-        Texture texture;
-        texture.id = TextureFromFile("fabric_diffuse.dds", "../textures");
-        texture.type = "texture_diffuse";
-        texture.path = "fabric_diffuse.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("fabric_normal.dds", "../textures");
-        texture.type = "texture_normal";
-        texture.path = "fabric_normal.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("fabric_height.dds", "../textures");
-        texture.type = "texture_height";
-        texture.path = "fabric_height.dds";
-        textures.push_back(texture);
-    } else if (type == "cup") {
-        Texture texture;
-        texture.id = TextureFromFile("quartz_diffuse.dds", "../textures");
-        texture.type = "texture_diffuse";
-        texture.path = "quartz_diffuse.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("quartz_normal.dds", "../textures");
-        texture.type = "texture_normal";
-        texture.path = "quartz_normal.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("quartz_height.dds", "../textures");
-        texture.type = "texture_height";
-        texture.path = "quartz_height.dds";
-        textures.push_back(texture);
-    } else if (type == "bowl") {
-        Texture texture;
-        texture.id = TextureFromFile("quartz_diffuse.dds", "../textures");
-        texture.type = "texture_diffuse";
-        texture.path = "quartz_diffuse.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("quartz_normal.dds", "../textures");
-        texture.type = "texture_normal";
-        texture.path = "quartz_normal.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("quartz_height.dds", "../textures");
-        texture.type = "texture_height";
-        texture.path = "quartz_height.dds";
-        textures.push_back(texture);
-    } else if (type == "plane") {
-        Texture texture;
-        texture.id = TextureFromFile("wood_diffuse.dds", "../textures");
-        texture.type = "texture_diffuse";
-        texture.path = "wood_diffuse.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("wood_normal.dds", "../textures");
-        texture.type = "texture_normal";
-        texture.path = "wood_normal.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("wood_height.dds", "../textures");
-        texture.type = "texture_height";
-        texture.path = "wood_height.dds";
-        textures.push_back(texture);
-    } else if (type == "sponge") {
-        Texture texture;
-        texture.id = TextureFromFile("sponge_diffuse.dds", "../textures");
-        texture.type = "texture_diffuse";
-        texture.path = "sponge_diffuse.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("sponge_normal.dds", "../textures");
-        texture.type = "texture_normal";
-        texture.path = "sponge_normal.dds";
-        textures.push_back(texture);
-        texture.id = TextureFromFile("sponge_height.dds", "../textures");
-        texture.type = "texture_height";
-        texture.path = "sponge_height.dds";
-        textures.push_back(texture);
-    }
-    return textures;
-}
-
-void upload_texture(ShaderProgram shader, vector<Texture> textures) {
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
-    for (unsigned int i = 0; i < textures.size(); i++) {
-        glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-        // retrieve texture number (the N in diffuse_textureN)
-        string number;
-        string name = textures[i].type;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_specular")
-            number = std::to_string(specularNr++); // transfer unsigned int to stream
-        else if (name == "texture_normal")
-            number = std::to_string(normalNr++); // transfer unsigned int to stream
-        else if (name == "texture_height")
-            number = std::to_string(heightNr++); // transfer unsigned int to stream
-
-        // now set the sampler to the correct texture unit
-        glUniform1i(glGetUniformLocation(shader.GetProgram(), (name + number).c_str()), i);
-        // and finally bind the texture
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
-    }
-}
 
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
@@ -299,15 +188,10 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
 
     Model model1("../objects/fabric.obj", "fabric");
-    vector<Texture> fabric_texture = setup_texture("fabric");
     Model model2("../objects/cup.obj", "cup");
-    vector<Texture> cup_texture = setup_texture("cup");
     Model model3("../objects/bowl.obj", "bowl");
-    vector<Texture> bowl_texture = setup_texture("bowl");
     Model model4("../objects/plane.obj", "plane");
-    vector<Texture> plane_texture = setup_texture("plane");
     Model model5("../objects/sponge.obj", "sponge");
-    vector<Texture> sponge_texture = setup_texture("sponge");
     GL_CHECK_ERRORS;
 
     auto t_start = chrono::high_resolution_clock::now();
@@ -400,13 +284,9 @@ int main(int argc, char **argv) {
 
         GL_CHECK_ERRORS;
 
-        upload_texture(program, fabric_texture);
         model1.Draw(program);
-        upload_texture(program, cup_texture);
         model2.Draw(program);
-        upload_texture(program, bowl_texture);
         model3.Draw(program);
-        upload_texture(program, plane_texture);
         model4.Draw(program);
         t_now = chrono::high_resolution_clock::now();
         time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
@@ -418,7 +298,6 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         GL_CHECK_ERRORS;
-        upload_texture(program, sponge_texture);
         model5.Draw(program);
 
         if (z_test) {

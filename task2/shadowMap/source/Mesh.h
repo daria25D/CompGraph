@@ -2,11 +2,12 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include <glm/glm.hpp>
 #include <vector>
 
 using namespace std;
 
-class ShderProgram;
+class ShaderProgram;
 
 struct Vertex {
     glm::vec3 Position;

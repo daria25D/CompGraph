@@ -12,8 +12,8 @@ Model::Model(string const &path, string Type, bool gamma) :
 
 void Model::Draw(const ShaderProgram& shader)
 {
-    for(auto & meshe : meshes)
-        meshe.Draw(shader);
+    for(auto & mesh : meshes)
+        mesh.Draw(shader);
 }
 
 void Model::loadModel(string const &path)
@@ -112,24 +112,58 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             indices.push_back(face.mIndices[j]);
     }
     // process materials
-    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-    // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
-    // Same applies to other texture as the following list summarizes:
-    // diffuse: texture_diffuseN
-    // specular: texture_specularN
-    // normal: texture_normalN
-
-    //TODO seems like this part should be done separately
-
+    if(mesh->mMaterialIndex >= 0)
+    {
+        aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+        vector<Texture> diffuseMaps = loadMaterialTextures(material,
+                                                           aiTextureType_DIFFUSE, "texture_diffuse");
+        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+        vector<Texture> specularMaps = loadMaterialTextures(material,
+                                                            aiTextureType_SPECULAR, "texture_specular");
+        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        vector<Texture> normalMaps = loadMaterialTextures(material,
+                                                            aiTextureType_NORMALS, "texture_normal");
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+    }
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
 }
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma)
+vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType tex_type, const string& typeName)
+{
+    vector<Texture> textures;
+    for(unsigned int i = 0; i < mat->GetTextureCount(tex_type); i++)
+    {
+        aiString str;
+        mat->GetTexture(tex_type, i, &str);
+        bool skip = false;
+        for(const auto & j : textures_loaded)
+        {
+            if(std::strcmp(j.path.data(), str.C_Str()) == 0)
+            {
+                textures.push_back(j);
+                skip = true;
+                break;
+            }
+        }
+        if(!skip)
+        {   // if texture hasn't been loaded already, load it
+            Texture texture;
+            texture.id = TextureFromFile(str.C_Str(), directory, true);
+            texture.type = typeName;
+            texture.path = str.C_Str();
+            textures.push_back(texture);
+            textures_loaded.push_back(texture); // add to loaded textures
+        }
+    }
+    return textures;
+}
+
+unsigned int TextureFromFile(const char *path, const string &directory, bool full_path)
 {
     string filename = string(path);
-    filename = directory + '/' + filename;
+    if (!full_path)
+        filename = directory + '/' + filename;
     unsigned int textureID;
     glGenTextures(1, &textureID);
 

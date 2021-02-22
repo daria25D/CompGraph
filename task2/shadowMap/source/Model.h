@@ -16,7 +16,8 @@ using namespace std;
 
 class ShaderProgram;
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
+//TODO fix full path in objects to relative
+unsigned int TextureFromFile(const char *path, const string &directory, bool full_path = false);
 
 class Model
 {
@@ -37,6 +38,8 @@ public:
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const &path);
+    vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
+                                         const string& typeName);
 
     // processes a node in a recursive fashion.
     // Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
