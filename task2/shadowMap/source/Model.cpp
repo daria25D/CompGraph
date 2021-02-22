@@ -149,7 +149,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType tex_t
         if(!skip)
         {   // if texture hasn't been loaded already, load it
             Texture texture;
-            texture.id = TextureFromFile(str.C_Str(), directory, true);
+            texture.id = TextureFromFile(str.C_Str(), directory);
             texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
@@ -159,11 +159,9 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType tex_t
     return textures;
 }
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool full_path)
+unsigned int TextureFromFile(const char *path, const string &directory)
 {
     string filename = string(path);
-    if (!full_path)
-        filename = directory + '/' + filename;
     unsigned int textureID;
     glGenTextures(1, &textureID);
 

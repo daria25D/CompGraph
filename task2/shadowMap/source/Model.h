@@ -16,8 +16,7 @@ using namespace std;
 
 class ShaderProgram;
 
-//TODO fix full path in objects to relative
-unsigned int TextureFromFile(const char *path, const string &directory, bool full_path = false);
+unsigned int TextureFromFile(const char *path, const string &directory);
 
 class Model
 {
