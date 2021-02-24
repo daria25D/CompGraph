@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "Controls.h"
 #include "Object.h"
+#include "Camera.h"
 
 //External dependencies
 #define GLFW_DLL
@@ -23,27 +24,7 @@ using namespace std;
 bool z_test = false;
 
 static const GLsizei WIDTH = 1024, HEIGHT = 780; //размеры окна
-//bool pressedKeys[1024];
-//
-//void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
-//    if (action == GLFW_PRESS) {
-//        pressedKeys[key] = true;
-//    } else if (action == GLFW_RELEASE) {
-//        pressedKeys[key] = false;
-//    }
-//    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-//        glfwSetWindowShouldClose(window, GL_TRUE);
-//    }
-//}
-//
-//void processActionKeys() {
-//    if (pressedKeys[GLFW_KEY_2]) {
-//        z_test = true;
-//    }
-//    if (pressedKeys[GLFW_KEY_1]) {
-//        z_test = false;
-//    }
-//}
+
 
 int initGL() {
     int res = 0;
@@ -142,12 +123,17 @@ int main(int argc, char **argv) {
     GL_CHECK_ERRORS;
     glfwSwapInterval(1); // force 60 frames per second
 
+    glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+    init_camera(cameraPos, cameraFront, cameraUp);
+    get_camera()->setCameraPosition(cameraPos);
     //matrices of view
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
-    glm::mat4 model(1.0f);
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
+//    glm::mat4 model(1.0f);
+//    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
     glm::mat4 view(1.0f);
-    view = glm::translate(view, glm::vec3(.0f, .0f, -6.0f));
+    view = glm::translate(view, glm::vec3(.0f, -1.0f, -6.0f));
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -191,12 +177,6 @@ int main(int argc, char **argv) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     GL_CHECK_ERRORS;
 
-    Model model1("../objects/fabric.obj", "fabric");
-    Model model2("../objects/cup.obj", "cup");
-    Model model3("../objects/bowl.obj", "bowl");
-    Model model4("../objects/plane.obj", "plane");
-    Model model5("../objects/sponge.obj", "sponge");
-    GL_CHECK_ERRORS;
 
     auto t_start = chrono::high_resolution_clock::now();
     glm::vec3 lightPos(1.0f, 6.5f, 0.7f);
@@ -217,8 +197,8 @@ int main(int argc, char **argv) {
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
+//        model = glm::mat4(1.0f);
+//        model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
@@ -228,31 +208,20 @@ int main(int argc, char **argv) {
 
         glUniformMatrix4fv(glGetUniformLocation(depth_prog.GetProgram(), "lightSpaceMatrix"), 1, GL_FALSE,
                            &lightSpaceMatrix[0][0]);
-        GLint modelLocDepth = glGetUniformLocation(depth_prog.GetProgram(), "model");
-        GL_CHECK_ERRORS;
-        glUniformMatrix4fv(modelLocDepth, 1, GL_FALSE, glm::value_ptr(model));
         GL_CHECK_ERRORS;
 
-        model1.Draw(depth_prog);
-        model2.Draw(depth_prog);
-        model3.Draw(depth_prog);
-        model4.Draw(depth_prog);
+        for (auto &object : allObjects)
+            object.DrawToDepth(depth_prog);
         auto t_now = chrono::high_resolution_clock::now();
         float time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
-        model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
-        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        modelLocDepth = glGetUniformLocation(depth_prog.GetProgram(), "model");
-        GL_CHECK_ERRORS;
-        glUniformMatrix4fv(modelLocDepth, 1, GL_FALSE, glm::value_ptr(model));
-        GL_CHECK_ERRORS;
-        model5.Draw(depth_prog);
+//        model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
+//        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         GL_CHECK_ERRORS;
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glCullFace(GL_FRONT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glViewport(0, 0, WIDTH, HEIGHT);
+        glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
 
         program.StartUseShader();
 
@@ -263,46 +232,21 @@ int main(int argc, char **argv) {
         GL_CHECK_ERRORS;
         glUniformMatrix4fv(glGetUniformLocation(program.GetProgram(), "lightSpaceMatrix"), 1, GL_FALSE,
                            &lightSpaceMatrix[0][0]);
-        model = glm::mat4(1.0);
-        model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
-        GL_CHECK_ERRORS;
-        GLint modelLoc = glGetUniformLocation(program.GetProgram(), "model");
-        GL_CHECK_ERRORS;
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        GL_CHECK_ERRORS;
-
-        GLint projLoc = glGetUniformLocation(program.GetProgram(), "proj");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-        GL_CHECK_ERRORS;
-
-        GLint viewLoc = glGetUniformLocation(program.GetProgram(), "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         GL_CHECK_ERRORS;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE4);
-        GL_CHECK_ERRORS;
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        GL_CHECK_ERRORS;
         glUniform1i(glGetUniformLocation(program.GetProgram(), "shadowMap"), 4);
-
         GL_CHECK_ERRORS;
 
-        model1.Draw(program);
-        model2.Draw(program);
-        model3.Draw(program);
-        model4.Draw(program);
+        for (auto &object : allObjects)
+            object.Draw(program, proj, view);
+
         t_now = chrono::high_resolution_clock::now();
         time = chrono::duration_cast<::chrono::duration<float>>(t_now - t_start).count();
-        model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
-
-        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        modelLoc = glGetUniformLocation(program.GetProgram(), "model");
-        GL_CHECK_ERRORS;
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        GL_CHECK_ERRORS;
-        model5.Draw(program);
+//        model = glm::translate(model, glm::vec3(-1.4f, 0.0f, 0.764f));
+//        model = glm::rotate(model, 0.5f * time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         if (z_test) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -317,6 +261,7 @@ int main(int argc, char **argv) {
         }
         glfwSwapBuffers(window);
     }
+    delete_camera();
     glfwTerminate();
     return 0;
 }

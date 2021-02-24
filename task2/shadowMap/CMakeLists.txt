@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(main)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES
     ./source/common.h
@@ -12,7 +12,8 @@ set(SOURCE_FILES
     ./source/Mesh.cpp
     ./source/Model.cpp
     ./source/Controls.cpp
-    ./source/Object.cpp)
+    ./source/Object.cpp
+    ./source/Camera.cpp)
 
 set(ADDITIONAL_INCLUDE_DIRS
         dependencies/include/GLAD)
