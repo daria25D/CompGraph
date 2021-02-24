@@ -20,6 +20,7 @@ public:
 
     void setTransform(const glm::mat4 &new_transform);
 
+    //TODO add animation data
     //TODO add ability to set rotation_axis as char (x, y, z)
     //pass angle in degrees
     void rotateObject(float rotation_angle, const glm::vec3 &rotation_axis);
@@ -27,7 +28,8 @@ public:
     void scaleObject(const glm::vec3 &scale_multiplier);
     void translateObject(const glm::vec3 &translate_vector);
 
-    void Draw(const ShaderProgram &shader);
+    void Draw(const ShaderProgram &shader, const glm::mat4 &proj, const glm::mat4 &view);
+    void DrawToDepth(ShaderProgram &shader);
 };
 
 vector<Object> setup_objects_from_json(const string &filename);

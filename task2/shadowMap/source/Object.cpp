@@ -1,13 +1,37 @@
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+//#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <rapidjson/istreamwrapper.h>
 #include <fstream>
 #include <iostream>
+
+#include "common.h"
+#include "ShaderProgram.h"
 #include "Object.h"
 
 Object::Object(const string &name, const string &path_to_obj_file, const glm::mat4 &transform) :
     model(path_to_obj_file, name), transform(transform) {}
 
-void Object::Draw(const ShaderProgram &shader) {
+void Object::Draw(const ShaderProgram &shader, const glm::mat4 &proj, const glm::mat4 &view) {
+    GLint modelLoc = glGetUniformLocation(shader.GetProgram(), "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    GL_CHECK_ERRORS;
+
+    GLint projLoc = glGetUniformLocation(shader.GetProgram(), "proj");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+    GL_CHECK_ERRORS;
+
+    GLint viewLoc = glGetUniformLocation(shader.GetProgram(), "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+    model.Draw(shader);
+}
+
+void Object::DrawToDepth(ShaderProgram &shader) {
+    GLint modelLoc = glGetUniformLocation(shader.GetProgram(), "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    GL_CHECK_ERRORS;
+
     model.Draw(shader);
 }
 
@@ -46,10 +70,11 @@ static Object setup_one_object_from_json(const rapidjson::Value& doc) {
     int i = 0, j = 0;
     for (const auto &num : doc["transform"].GetArray()) {
         transform[i][j] = num.GetFloat();
-        i = (i + 1) % 3;
+        i = (i + 1) % 4;
         if (i == 0)
             j++;
     }
+//    transform = glm::rotate(transform, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
 
     return Object(name, path, transform);
 }
