@@ -3,6 +3,7 @@
 #include "ShaderProgram.h"
 #include "Mesh.h"
 #include "Model.h"
+#include "Controls.h"
 
 //External dependencies
 #define GLFW_DLL
@@ -21,27 +22,27 @@ using namespace std;
 bool z_test = false;
 
 static const GLsizei WIDTH = 1024, HEIGHT = 780; //размеры окна
-bool pressedKeys[1024];
-
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
-    if (action == GLFW_PRESS) {
-        pressedKeys[key] = true;
-    } else if (action == GLFW_RELEASE) {
-        pressedKeys[key] = false;
-    }
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    }
-}
-
-void processActionKeys() {
-    if (pressedKeys[GLFW_KEY_2]) {
-        z_test = true;
-    }
-    if (pressedKeys[GLFW_KEY_1]) {
-        z_test = false;
-    }
-}
+//bool pressedKeys[1024];
+//
+//void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
+//    if (action == GLFW_PRESS) {
+//        pressedKeys[key] = true;
+//    } else if (action == GLFW_RELEASE) {
+//        pressedKeys[key] = false;
+//    }
+//    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+//        glfwSetWindowShouldClose(window, GL_TRUE);
+//    }
+//}
+//
+//void processActionKeys() {
+//    if (pressedKeys[GLFW_KEY_2]) {
+//        z_test = true;
+//    }
+//    if (pressedKeys[GLFW_KEY_1]) {
+//        z_test = false;
+//    }
+//}
 
 int initGL() {
     int res = 0;
@@ -89,6 +90,7 @@ void renderQuad() {
 int main(int argc, char **argv) {
     if (!glfwInit())
         return -1;
+    KeyMouseControls &controls = KeyMouseControls::getInstance();
 
     //запрашиваем контекст opengl версии 3.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -98,7 +100,7 @@ int main(int argc, char **argv) {
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL basic sample", nullptr, nullptr);
-    glfwSetKeyCallback(window, key_callback);
+    glfwSetKeyCallback(window, &KeyMouseControls::keyCallback);
     if (window == nullptr) {
         cout << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -197,7 +199,7 @@ int main(int argc, char **argv) {
     glm::vec3 lightPos(1.0f, 6.5f, 0.7f);
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        processActionKeys();
+        controls.processActionKeys(z_test);
         GL_CHECK_ERRORS;
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
