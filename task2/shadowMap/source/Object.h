@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <glm/mat4x4.hpp> // glm::mat4
+#include "rapidjson/document.h"
 
 #include "Model.h"
 
@@ -29,6 +30,6 @@ public:
     void Draw(const ShaderProgram &shader);
 };
 
-vector<Object> setup_objects_from_file(const string &filename);
+vector<Object> setup_objects_from_json(const string &filename);
 
 #endif //MAIN_OBJECT_H

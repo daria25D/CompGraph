@@ -1,0 +1,54 @@
+{
+  "objects" : [
+    {
+      "name" : "fabric",
+      "path" : "../objects/fabric.obj",
+      "transform" : [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 0.0
+      ]
+    },
+    {
+      "name" : "bowl",
+      "path" : "../objects/bowl.obj",
+      "transform" : [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 0.0
+      ]
+    },
+    {
+      "name" : "cup",
+      "path" : "../objects/cup.obj",
+      "transform" : [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 0.0
+      ]
+    },
+    {
+      "name" : "sponge",
+      "path" : "../objects/sponge.obj",
+      "transform" : [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 0.0
+      ]
+    },
+    {
+      "name" : "plane",
+      "path" : "../objects/plane.obj",
+      "transform" : [
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 0.0
+      ]
+    }
+  ]
+}

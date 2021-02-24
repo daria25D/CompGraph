@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Controls.h"
+#include "Object.h"
 
 //External dependencies
 #define GLFW_DLL
@@ -135,6 +136,8 @@ int main(int argc, char **argv) {
     ShaderProgram program(shaders);
     ShaderProgram depth_prog(shadersDepth);
     ShaderProgram quad_prog(shadersPass);
+
+    vector<Object> allObjects = setup_objects_from_json("../models/models.json");
 
     GL_CHECK_ERRORS;
     glfwSwapInterval(1); // force 60 frames per second
