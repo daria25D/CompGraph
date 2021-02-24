@@ -11,7 +11,8 @@ set(SOURCE_FILES
     ./source/ShaderProgram.cpp
     ./source/Mesh.cpp
     ./source/Model.cpp
-    ./source/Controls.cpp)
+    ./source/Controls.cpp
+    ./source/Object.cpp)
 
 set(ADDITIONAL_INCLUDE_DIRS
         dependencies/include/GLAD)
