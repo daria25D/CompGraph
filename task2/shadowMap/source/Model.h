@@ -18,8 +18,7 @@ class ShaderProgram;
 
 unsigned int TextureFromFile(const char *path, const string &directory);
 
-class Model
-{
+class Model {
 public:
     /*  Model Data */
     vector<Texture> textures_loaded; // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
@@ -32,13 +31,14 @@ public:
     Model(string const &path, string Type, bool gamma = false);
 
     // draws the model, and thus all its meshes
-    void Draw(const ShaderProgram& shader);
+    void Draw(const ShaderProgram &shader);
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const &path);
+
     vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
-                                         const string& typeName);
+                                         const string &typeName);
 
     // processes a node in a recursive fashion.
     // Processes each individual mesh located at the node and repeats this process on its children nodes (if any).

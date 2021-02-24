@@ -32,7 +32,8 @@ public:
     unsigned int VAO;
 
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
-    void Draw(const ShaderProgram& shader);
+
+    void Draw(const ShaderProgram &shader);
 
 private:
     /*  Render data  */
@@ -41,4 +42,5 @@ private:
     // initializes all the buffer objects/arrays
     void setupMesh();
 };
+
 #endif
