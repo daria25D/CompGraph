@@ -1,8 +1,6 @@
 //internal includes
 #include "common.h"
 #include "ShaderProgram.h"
-#include "Mesh.h"
-#include "Model.h"
 #include "Controls.h"
 #include "Object.h"
 #include "Camera.h"
@@ -15,7 +13,6 @@
 #include <chrono>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 

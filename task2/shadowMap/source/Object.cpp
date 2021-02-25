@@ -1,9 +1,6 @@
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
-//#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <rapidjson/istreamwrapper.h>
-#include <fstream>
-#include <iostream>
 
 #include "common.h"
 #include "ShaderProgram.h"
