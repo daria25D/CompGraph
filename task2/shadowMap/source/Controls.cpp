@@ -26,6 +26,23 @@ void KeyMouseControls::setKeyCallback(GLFWwindow *window, int key, int scancode,
     }
 }
 
+
+void KeyMouseControls::mouseCallback(GLFWwindow *window, double x_pos, double y_pos) {
+    getInstance().setMouseCallback(window, x_pos, y_pos);
+}
+
+void KeyMouseControls::setMouseCallback(GLFWwindow *window, double x_pos, double y_pos) {
+    float xOffset = x_pos - lastX;
+    float yOffset = y_pos - lastY;
+    lastX = x_pos;
+    lastY = y_pos;
+
+    xOffset *= MOUSE_SENSITIVITY;
+    yOffset *= MOUSE_SENSITIVITY;
+
+    get_camera()->processCameraRotationOnMouse(xOffset, yOffset);
+}
+
 void KeyMouseControls::processActionKeys(bool &z_test) {
     if (pressedKeys[GLFW_KEY_2]) {
         z_test = true;
@@ -34,30 +51,22 @@ void KeyMouseControls::processActionKeys(bool &z_test) {
         z_test = false;
     }
     if (pressedKeys[GLFW_KEY_W]) {
-        get_camera()->moveCameraPosition(get_camera()->getCameraSpeed() *
-                                         get_camera()->getCameraFront());
+        get_camera()->processCameraMovement(FORWARD);
     }
     if (pressedKeys[GLFW_KEY_S]) {
-        get_camera()->moveCameraPosition(-get_camera()->getCameraSpeed() *
-                                          get_camera()->getCameraFront());
+        get_camera()->processCameraMovement(BACKWARD);
     }
     if (pressedKeys[GLFW_KEY_A]) {
-        get_camera()->moveCameraPosition(
-                -get_camera()->getCameraSpeed() *
-                glm::normalize(
-                        glm::cross(get_camera()->getCameraFront(),
-                                   get_camera()->getCameraUp())
-                )
-        );
+        get_camera()->processCameraMovement(LEFT);
     }
     if (pressedKeys[GLFW_KEY_D]) {
-        get_camera()->moveCameraPosition(
-                get_camera()->getCameraSpeed() *
-                glm::normalize(
-                        glm::cross(get_camera()->getCameraFront(),
-                                   get_camera()->getCameraUp())
-                )
-        );
+        get_camera()->processCameraMovement(RIGHT);
     }
     //TODO add more keys
+    /*
+     * shift for speed up moving around
+     * Q/E for rotating left and right
+     * X/Z for rotating up and down
+     * OR: Q/E/X/Z can be replaced by mouse movement
+     */
 }

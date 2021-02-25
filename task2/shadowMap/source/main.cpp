@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL basic sample", nullptr, nullptr);
-    glfwSetKeyCallback(window, &KeyMouseControls::keyCallback);
     if (window == nullptr) {
         cout << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -88,6 +87,8 @@ int main(int argc, char **argv) {
 
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetKeyCallback(window, &KeyMouseControls::keyCallback);
+    glfwSetCursorPosCallback(window, &KeyMouseControls::mouseCallback);
 
     if (initGL() != 0)
         return -1;
