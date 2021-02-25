@@ -1,5 +1,6 @@
 #include <memory>
 #include <cmath>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Camera.h"
 
 static std::unique_ptr<Camera> camera;
@@ -8,19 +9,20 @@ Camera *get_camera() {
     return camera.get();
 }
 
-void init_camera(const glm::vec3 &cam_pos, const glm::vec3 &cam_front, const glm::vec3 &cam_up) {
-    camera = std::make_unique<Camera>(cam_pos, cam_front, cam_up);
+void init_camera(const glm::vec3 &cam_pos, const glm::vec3 &cam_front, const glm::vec3 &cam_up, int w, int h) {
+    camera = std::make_unique<Camera>(cam_pos, cam_front, cam_up, w, h);
 }
 
 void delete_camera() {
     camera.reset();
 }
 
-Camera::Camera(const glm::vec3 &cam_pos, const glm::vec3 &cam_front, const glm::vec3 &cam_up) :
-    cameraPosition(cam_pos), cameraFront(cam_front), cameraUp(cam_up)
+Camera::Camera(const glm::vec3 &cam_pos, const glm::vec3 &cam_front, const glm::vec3 &cam_up, int w, int h) :
+    cameraPosition(cam_pos), cameraFront(cam_front), cameraUp(cam_up), width(w), height(h)
 {
     lastFrame = std::chrono::high_resolution_clock::now();
     updateCameraVectors();
+    updateViewProjMatrices();
 }
 
 const glm::vec3 &Camera::getCameraPosition() {
@@ -41,6 +43,14 @@ float Camera::getCameraFov() const {
 
 float Camera::getCameraSpeed() const {
     return deltaTime * CAMERA_SPEED_MULTIPLIER;
+}
+
+glm::mat4 Camera::getViewMatrix() {
+    return view;
+}
+
+glm::mat4 Camera::getProjMatrix() {
+    return proj;
 }
 
 void Camera::setCameraPosition(const glm::vec3 &cam_pos) {
@@ -80,6 +90,11 @@ void Camera::updateCameraVectors() {
     cameraUp    = glm::normalize(glm::cross(cameraRight, cameraFront));
 }
 
+void Camera::updateViewProjMatrices() {
+    proj = glm::perspective(glm::radians(fov), (float) width / (float) height, 0.1f, 100.0f);
+    view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
+}
+
 void Camera::processCameraMovement(DIRECTION direction) {
     if (direction == FORWARD)
         moveCameraPosition(getCameraSpeed() * getCameraFront());
@@ -91,6 +106,8 @@ void Camera::processCameraMovement(DIRECTION direction) {
     else if (direction == RIGHT)
         moveCameraPosition(getCameraSpeed() *
                            glm::normalize(glm::cross(getCameraFront(), getCameraUp())));
+
+    updateViewProjMatrices();
 }
 
 void Camera::processCameraRotationOnMouse(float x_offset, float y_offset, bool constrain_pitch) {
@@ -104,6 +121,7 @@ void Camera::processCameraRotationOnMouse(float x_offset, float y_offset, bool c
     }
 
     updateCameraVectors();
+    updateViewProjMatrices();
 }
 
 void Camera::processCameraScroll(float y_offset) {
@@ -112,4 +130,5 @@ void Camera::processCameraScroll(float y_offset) {
         fov = 1.0f;
     else if (fov > 45.0f)
         fov = 45.0f;
+    updateViewProjMatrices();
 }

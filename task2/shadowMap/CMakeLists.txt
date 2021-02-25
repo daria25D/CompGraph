@@ -13,7 +13,9 @@ set(SOURCE_FILES
     ./source/Model.cpp
     ./source/Controls.cpp
     ./source/Object.cpp
-    ./source/Camera.cpp)
+    ./source/Camera.cpp
+    ./source/Render.cpp
+    ./source/LightSource.cpp)
 
 set(ADDITIONAL_INCLUDE_DIRS
         dependencies/include/GLAD)
