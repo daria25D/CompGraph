@@ -1,7 +1,6 @@
 //External dependencies
 #define GLFW_DLL
 
-//#include <GLFW/glfw3.h>
 #include <chrono>
 #include <glm/glm.hpp>
 
@@ -17,7 +16,6 @@ using namespace std;
 static const GLsizei WIDTH = 1024, HEIGHT = 780; //размеры окна
 
 int main(int argc, char **argv) {
-
     //camera setup
     glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);

@@ -15,9 +15,11 @@ static unique_ptr<Renderer> renderer;
 Renderer *get_renderer() {
     return renderer.get();
 }
+
 void init_renderer(int w, int h) {
     renderer = make_unique<Renderer>(w, h);
 }
+
 void delete_renderer() {
     renderer.reset();
 }
