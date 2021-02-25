@@ -6,7 +6,7 @@ class GLFWwindow;
 
 class KeyMouseControls {
 
-    KeyMouseControls(){}
+    KeyMouseControls();
     KeyMouseControls(const KeyMouseControls &);
     void operator=(const KeyMouseControls &);
     std::array<bool, 1024> pressedKeys;

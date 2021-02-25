@@ -127,13 +127,11 @@ int main(int argc, char **argv) {
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
     init_camera(cameraPos, cameraFront, cameraUp);
-    get_camera()->setCameraPosition(cameraPos);
     //matrices of view
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
-//    glm::mat4 model(1.0f);
-//    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
     glm::mat4 view(1.0f);
-    view = glm::translate(view, glm::vec3(.0f, -1.0f, -6.0f));
+    cameraPos = get_camera()->getCameraPosition();
+    view = glm::lookAt(cameraPos, cameraPos + get_camera()->getCameraFront(), get_camera()->getCameraUp());
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -183,6 +181,13 @@ int main(int argc, char **argv) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         controls.processActionKeys(z_test);
+
+        //TODO separate time management from camera?
+        get_camera()->updateCurrentTime();
+        //TODO store view matrix inside camera class? recalculate view on change?
+        cameraPos = get_camera()->getCameraPosition();
+        view = glm::lookAt(cameraPos, cameraPos + get_camera()->getCameraFront(), get_camera()->getCameraUp());
+
         GL_CHECK_ERRORS;
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -196,9 +201,6 @@ int main(int argc, char **argv) {
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
         glClear(GL_DEPTH_BUFFER_BIT);
-
-//        model = glm::mat4(1.0f);
-//        model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 1.0f, .0f));
 
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;

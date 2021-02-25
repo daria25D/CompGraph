@@ -1,5 +1,10 @@
-#include "Controls.h"
 #include <GLFW/glfw3.h>
+#include "Controls.h"
+#include "Camera.h"
+
+KeyMouseControls::KeyMouseControls() {
+    pressedKeys.fill(false);
+}
 
 KeyMouseControls &KeyMouseControls::getInstance() {
     static KeyMouseControls instance;
@@ -27,6 +32,32 @@ void KeyMouseControls::processActionKeys(bool &z_test) {
     }
     if (pressedKeys[GLFW_KEY_1]) {
         z_test = false;
+    }
+    if (pressedKeys[GLFW_KEY_W]) {
+        get_camera()->moveCameraPosition(get_camera()->getCameraSpeed() *
+                                         get_camera()->getCameraFront());
+    }
+    if (pressedKeys[GLFW_KEY_S]) {
+        get_camera()->moveCameraPosition(-get_camera()->getCameraSpeed() *
+                                          get_camera()->getCameraFront());
+    }
+    if (pressedKeys[GLFW_KEY_A]) {
+        get_camera()->moveCameraPosition(
+                -get_camera()->getCameraSpeed() *
+                glm::normalize(
+                        glm::cross(get_camera()->getCameraFront(),
+                                   get_camera()->getCameraUp())
+                )
+        );
+    }
+    if (pressedKeys[GLFW_KEY_D]) {
+        get_camera()->moveCameraPosition(
+                get_camera()->getCameraSpeed() *
+                glm::normalize(
+                        glm::cross(get_camera()->getCameraFront(),
+                                   get_camera()->getCameraUp())
+                )
+        );
     }
     //TODO add more keys
 }
