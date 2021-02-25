@@ -35,6 +35,10 @@ const glm::vec3 &Camera::getCameraUp() {
     return cameraUp;
 }
 
+float Camera::getCameraFov() const {
+    return fov;
+}
+
 float Camera::getCameraSpeed() const {
     return deltaTime * CAMERA_SPEED_MULTIPLIER;
 }
@@ -49,6 +53,10 @@ void Camera::setCameraFront(const glm::vec3 &cam_front) {
 
 void Camera::setCameraUp(const glm::vec3 &cam_up) {
     cameraUp = cam_up;
+}
+
+void Camera::setCameraFov(const float new_fov) {
+    fov = new_fov;
 }
 
 void Camera::moveCameraPosition(const glm::vec3 &offset) {
@@ -96,4 +104,12 @@ void Camera::processCameraRotationOnMouse(float x_offset, float y_offset, bool c
     }
 
     updateCameraVectors();
+}
+
+void Camera::processCameraScroll(float y_offset) {
+    fov -= y_offset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    else if (fov > 45.0f)
+        fov = 45.0f;
 }

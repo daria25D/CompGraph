@@ -43,6 +43,14 @@ void KeyMouseControls::setMouseCallback(GLFWwindow *window, double x_pos, double
     get_camera()->processCameraRotationOnMouse(xOffset, yOffset);
 }
 
+void KeyMouseControls::scrollCallback(GLFWwindow *window, double x_offset, double y_offset) {
+    getInstance().setScrollCallback(window, x_offset, y_offset);
+}
+
+void KeyMouseControls::setScrollCallback(GLFWwindow *window, double x_offset, double y_offset) {
+    get_camera()->processCameraScroll(float(y_offset));
+}
+
 void KeyMouseControls::processActionKeys(bool &z_test) {
     if (pressedKeys[GLFW_KEY_2]) {
         z_test = true;
@@ -62,11 +70,5 @@ void KeyMouseControls::processActionKeys(bool &z_test) {
     if (pressedKeys[GLFW_KEY_D]) {
         get_camera()->processCameraMovement(RIGHT);
     }
-    //TODO add more keys
-    /*
-     * shift for speed up moving around
-     * Q/E for rotating left and right
-     * X/Z for rotating up and down
-     * OR: Q/E/X/Z can be replaced by mouse movement
-     */
+    //TODO add shift support for speedup
 }

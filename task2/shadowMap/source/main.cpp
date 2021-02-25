@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetKeyCallback(window, &KeyMouseControls::keyCallback);
     glfwSetCursorPosCallback(window, &KeyMouseControls::mouseCallback);
+    glfwSetScrollCallback(window, &KeyMouseControls::scrollCallback);
 
     if (initGL() != 0)
         return -1;
@@ -126,7 +127,8 @@ int main(int argc, char **argv) {
     glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
     init_camera(cameraPos, cameraFront, cameraUp);
     //matrices of view
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(get_camera()->getCameraFov()),
+                               (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
     glm::mat4 view(1.0f);
     cameraPos = get_camera()->getCameraPosition();
     view = glm::lookAt(cameraPos, cameraPos + get_camera()->getCameraFront(), get_camera()->getCameraUp());
@@ -182,7 +184,9 @@ int main(int argc, char **argv) {
 
         //TODO separate time management from camera?
         get_camera()->updateCurrentTime();
-        //TODO store view matrix inside camera class? recalculate view on change?
+        //TODO store proj and view matrices inside camera class? recalculate view on change?
+        proj = glm::perspective(glm::radians(get_camera()->getCameraFov()),
+                                (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
         cameraPos = get_camera()->getCameraPosition();
         view = glm::lookAt(cameraPos, cameraPos + get_camera()->getCameraFront(), get_camera()->getCameraUp());
 
