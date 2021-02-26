@@ -3,6 +3,20 @@
 #include "LightSource.h"
 #include "ShaderProgram.h"
 
+DirectionalLight::DirectionalLight() :
+    direction(glm::vec3(0.0f, -1.0f, 0.0f)),
+    color(glm::vec3(1.0f, 1.0f, 1.0f))
+{}
+
+DirectionalLight::DirectionalLight(glm::vec3 dir, glm::vec3 color) :
+        direction(dir), color(color)
+{}
+
+void DirectionalLight::setToShader(const ShaderProgram &shader) {
+    shader.SetUniform("directionalLight.direction", direction);
+    shader.SetUniform("directionalLight.color", color);
+}
+
 LightSource::LightSource(int w, int h, glm::vec3 light_pos) :
     width(w), height(h), lightPos(light_pos)
 {
@@ -11,10 +25,8 @@ LightSource::LightSource(int w, int h, glm::vec3 light_pos) :
     lightSpaceMatrix = lightProjection * lightView;
 }
 
-void LightSource::setLightSourceToShader(const ShaderProgram &shader) {
-
-    glUniform3fv(glGetUniformLocation(shader.GetProgram(), "lightPos"), 1, &lightPos[0]);
-    GL_CHECK_ERRORS;
-    glUniformMatrix4fv(glGetUniformLocation(shader.GetProgram(), "lightSpaceMatrix"), 1, GL_FALSE,
-                       &lightSpaceMatrix[0][0]);
+void LightSource::setLightSourceToShader(const ShaderProgram &shader, bool to_depth) {
+    if (!to_depth)
+        shader.SetUniform("lightPos", lightPos);
+    shader.SetUniform("lightSpaceMatrix", lightSpaceMatrix);
 }
