@@ -195,7 +195,7 @@ void Renderer::RenderToDepth() {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    light.setLightSourceToShader(depthProgram);
+    light.setLightSourceToShader(depthProgram, true);
 
     for (auto &object : allObjects)
         object.DrawToDepth(depthProgram);
@@ -217,11 +217,10 @@ void Renderer::Render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    glUniform1i(glGetUniformLocation(program.GetProgram(), "shadowMap"), 4);
+    program.SetUniform("shadowMap", 4);
     GL_CHECK_ERRORS;
     for (auto &object : allObjects)
         object.Draw(program, get_camera()->getProjMatrix(), get_camera()->getViewMatrix());
-
     if (zTest) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
         glViewport(0, 0, width, height);
@@ -229,8 +228,7 @@ void Renderer::Render() {
         quadProgram.StartUseShader();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        GLuint texID = glGetUniformLocation(quadProgram.GetProgram(), "shadowMap");
-        glUniform1i(texID, 0);
+        program.SetUniform("shadowMap", 0);
         renderQuad();
     }
     glfwSwapBuffers(window.get());
@@ -245,5 +243,8 @@ bool &Renderer::getZTestValue() {
 }
 
 Renderer::~Renderer() {
-
+    program.Release();
+    depthProgram.Release();
+    quadProgram.Release();
+    window.reset();
 }

@@ -2,6 +2,8 @@
 #define SHADERPROGRAM_H
 
 #include <unordered_map>
+#include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
 #include "common.h"
 
 
@@ -32,6 +34,10 @@ public:
     void SetUniform(const std::string &location, int value) const;
 
     void SetUniform(const std::string &location, unsigned int value) const;
+
+    void SetUniform(const std::string &location, glm::vec3 value) const;
+
+    void SetUniform(const std::string &location, glm::mat4 value) const;
 
 private:
     static GLuint LoadShaderObject(GLenum type, const std::string &filename);

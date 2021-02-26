@@ -10,17 +10,9 @@ Object::Object(const string &name, const string &path_to_obj_file, const glm::ma
     model(path_to_obj_file, name), transform(transform) {}
 
 void Object::Draw(const ShaderProgram &shader, const glm::mat4 &proj, const glm::mat4 &view) {
-    GLint modelLoc = glGetUniformLocation(shader.GetProgram(), "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
-    GL_CHECK_ERRORS;
-
-    GLint projLoc = glGetUniformLocation(shader.GetProgram(), "proj");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-    GL_CHECK_ERRORS;
-
-    GLint viewLoc = glGetUniformLocation(shader.GetProgram(), "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
+    shader.SetUniform("model", transform);
+    shader.SetUniform("proj", proj);
+    shader.SetUniform("view", view);
     model.Draw(shader);
 }
 
