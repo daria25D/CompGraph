@@ -7,33 +7,36 @@
 
 class ShaderProgram;
 
-class DirectionalLight {
-    glm::vec3 direction;
+class LightSource {
+protected:
     glm::vec3 color;
     glm::vec3 ambient;
+public:
+    LightSource(glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f),
+                         glm::vec3 ambient = glm::vec3(0.2f, 0.2f, 0.2f));
+    virtual void setToShader(const ShaderProgram &shader){}
+};
+
+class DirectionalLight : LightSource {
+    glm::vec3 direction;
 public:
     DirectionalLight();
     explicit DirectionalLight(glm::vec3 dir,
                               glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f),
                               glm::vec3 ambient = glm::vec3(0.2f, 0.2f, 0.2f));
-    void setToShader(const ShaderProgram &shader);
+    void setToShader(const ShaderProgram &shader) override;
 };
-//TODO add class from which other light sources can inherit
-class LightSource {
+
+class Lights {
     glm::vec3 lightPos;
     int width, height;
 
     glm::mat4 lightProjection, lightView, lightSpaceMatrix;
+    std::vector<DirectionalLight> directionalLights;
 
 public:
-    explicit LightSource(int w, int h, glm::vec3 light_pos);
+    explicit Lights(int w, int h, glm::vec3 light_pos);
     void setLightSourceToShader(const ShaderProgram &shader, bool to_depth = false);
-};
-
-struct Lights {
-    std::vector<DirectionalLight> directionalLights;
-//    vector<LightSource> lightSources;
-    // TODO add methods
 };
 
 #endif //MAIN_LIGHTSOURCE_H

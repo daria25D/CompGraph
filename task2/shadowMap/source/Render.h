@@ -34,7 +34,6 @@ class Renderer {
     GLuint depthMap;
 
     vector<Object> allObjects;
-    LightSource light;
     Lights allLights;
 
     bool zTest = false;

@@ -61,7 +61,7 @@ static int initGL() {
     return 0;
 }
 
-Renderer::Renderer(int w, int h) : width(w), height(h), light(w, h, LIGHT_POS)
+Renderer::Renderer(int w, int h) : width(w), height(h), allLights(w, h, LIGHT_POS)
 {
 //    window.reset();
     int initResult = Init();
@@ -175,7 +175,7 @@ int Renderer::Init()
     glEnable(GL_MULTISAMPLE);
 
     initDepthFrameBuffer();
-    allLights.directionalLights.push_back(DirectionalLight());
+//    allLights.directionalLights.push_back(DirectionalLight());
 
     return SUCCESS;
 }
@@ -196,7 +196,7 @@ void Renderer::RenderToDepth() {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    light.setLightSourceToShader(depthProgram, true);
+    allLights.setLightSourceToShader(depthProgram, true);
 
     for (auto &object : allObjects)
         object.DrawToDepth(depthProgram);
@@ -213,9 +213,7 @@ void Renderer::Render() {
     glViewport(0, 0, width, height);
     GL_CHECK_ERRORS;
 
-    light.setLightSourceToShader(program);
-    for (auto & dl : allLights.directionalLights)
-        dl.setToShader(program);
+    allLights.setLightSourceToShader(program);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE4);
