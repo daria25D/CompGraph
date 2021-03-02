@@ -91,7 +91,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         vector.x = mesh->mTangents[i].x;
         vector.y = mesh->mTangents[i].y;
         vector.z = mesh->mTangents[i].z;
-        std::cout << vector.x << " " << vector.y << " " << vector.z << std::endl;
         vertex.Tangent = vector;
         // bitangent
         vector.x = mesh->mBitangents[i].x;
@@ -117,7 +116,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
                                                             aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
         vector<Texture> normalMaps = loadMaterialTextures(material,
-                                                          aiTextureType_NORMALS, "texture_normal");
+                                                          aiTextureType_HEIGHT, "texture_normal");
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     }
     // return a mesh object created from the extracted mesh data
