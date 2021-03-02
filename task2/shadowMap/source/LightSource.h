@@ -14,7 +14,7 @@ protected:
 public:
     LightSource(glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f),
                          glm::vec3 ambient = glm::vec3(0.2f, 0.2f, 0.2f));
-    virtual void setToShader(const ShaderProgram &shader){}
+    virtual void setToShader(const ShaderProgram &shader, int i){}
 };
 
 class DirectionalLight : LightSource {
@@ -24,7 +24,21 @@ public:
     explicit DirectionalLight(glm::vec3 dir,
                               glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f),
                               glm::vec3 ambient = glm::vec3(0.2f, 0.2f, 0.2f));
-    void setToShader(const ShaderProgram &shader) override;
+    void setToShader(const ShaderProgram &shader, int i) override;
+};
+
+class PointLight : LightSource {
+    glm::vec3 position;
+    //dist=100 	c=1.0 	l=0.045 	q=0.0075
+    float constant;
+    float linear;
+    float quadratic;
+public:
+    PointLight();
+    explicit PointLight(glm::vec3 pos, float constant = 1.0f, float linear = 0.045f, float quadratic = 0.0075f,
+                        glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f),
+                        glm::vec3 ambient = glm::vec3(0.2f, 0.2f, 0.2f));
+    void setToShader(const ShaderProgram &shader, int i) override;
 };
 
 class Lights {
@@ -33,6 +47,7 @@ class Lights {
 
     glm::mat4 lightProjection, lightView, lightSpaceMatrix;
     std::vector<DirectionalLight> directionalLights;
+    std::vector<PointLight> pointLights;
 
 public:
     explicit Lights(int w, int h, glm::vec3 light_pos);
