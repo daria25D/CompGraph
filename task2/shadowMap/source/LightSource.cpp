@@ -1,20 +1,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "LightSource.h"
+#include "Camera.h"
 #include "ShaderProgram.h"
 
 DirectionalLight::DirectionalLight() :
     direction(glm::vec3(0.0f, -1.0f, 0.0f)),
-    color(glm::vec3(1.0f, 1.0f, 1.0f))
+    color(glm::vec3(1.0f, 1.0f, 1.0f)),
+    ambient(glm::vec3(0.2f, 0.2f, 0.2f))
 {}
 
-DirectionalLight::DirectionalLight(glm::vec3 dir, glm::vec3 color) :
-        direction(dir), color(color)
+DirectionalLight::DirectionalLight(glm::vec3 dir, glm::vec3 color, glm::vec3 ambient) :
+        direction(dir), color(color), ambient(ambient)
 {}
 
 void DirectionalLight::setToShader(const ShaderProgram &shader) {
     shader.SetUniform("directionalLight.direction", direction);
     shader.SetUniform("directionalLight.color", color);
+    shader.SetUniform("directionalLight.ambient", ambient);
 }
 
 LightSource::LightSource(int w, int h, glm::vec3 light_pos) :

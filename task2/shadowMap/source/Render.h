@@ -7,7 +7,7 @@
 #include "Object.h"
 #include "LightSource.h"
 
-#define PATH_TO_OBJECTS "../models/models.json"
+#define PATH_TO_OBJECTS "../models/cup.json"
 #define LIGHT_POS glm::vec3(1.0f, 6.5f, 0.7f)
 
 struct DestroyglfwWin{
@@ -17,6 +17,7 @@ struct DestroyglfwWin{
 };
 
 class Renderer {
+    //TODO better error handling
     enum STATE {
         SUCCESS = 0,
         ERROR_GLFWINIT,
@@ -34,6 +35,7 @@ class Renderer {
 
     vector<Object> allObjects;
     LightSource light;
+    Lights allLights;
 
     bool zTest = false;
 

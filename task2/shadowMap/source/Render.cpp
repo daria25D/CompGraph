@@ -175,6 +175,7 @@ int Renderer::Init()
     glEnable(GL_MULTISAMPLE);
 
     initDepthFrameBuffer();
+    allLights.directionalLights.push_back(DirectionalLight());
 
     return SUCCESS;
 }
@@ -213,11 +214,14 @@ void Renderer::Render() {
     GL_CHECK_ERRORS;
 
     light.setLightSourceToShader(program);
+    for (auto & dl : allLights.directionalLights)
+        dl.setToShader(program);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, depthMap);
     program.SetUniform("shadowMap", 4);
+    program.SetUniform("viewPos", get_camera()->getCameraPosition());
     GL_CHECK_ERRORS;
     for (auto &object : allObjects)
         object.Draw(program, get_camera()->getProjMatrix(), get_camera()->getViewMatrix());
