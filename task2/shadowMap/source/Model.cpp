@@ -18,7 +18,11 @@ void Model::loadModel(string const &path) {
     // read file via ASSIMP
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(path,
-                                             aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+                                             aiProcess_Triangulate |
+                                             aiProcess_FlipUVs |
+                                             aiProcess_CalcTangentSpace |
+                                             aiProcess_JoinIdenticalVertices |
+                                             aiProcess_ImproveCacheLocality);
     // check for errors
     if (!scene || scene->mFlags & (unsigned int) AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
@@ -87,6 +91,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         vector.x = mesh->mTangents[i].x;
         vector.y = mesh->mTangents[i].y;
         vector.z = mesh->mTangents[i].z;
+        std::cout << vector.x << " " << vector.y << " " << vector.z << std::endl;
         vertex.Tangent = vector;
         // bitangent
         vector.x = mesh->mBitangents[i].x;
